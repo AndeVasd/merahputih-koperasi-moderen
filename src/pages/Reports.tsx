@@ -1,0 +1,227 @@
+import { useState, useRef } from 'react';
+import { MainLayout } from '@/components/layout/MainLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Download, Printer, FileText, Calendar } from 'lucide-react';
+import { mockLoans, mockMembers } from '@/data/mockData';
+import { CATEGORY_LABELS, LoanCategory } from '@/types/koperasi';
+import { useReactToPrint } from 'react-to-print';
+
+export default function Reports() {
+  const [reportType, setReportType] = useState<string>('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: reportRef,
+    documentTitle: `Laporan-Koperasi-${new Date().toISOString().split('T')[0]}`,
+  });
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const filteredLoans = mockLoans.filter((loan) => {
+    if (reportType !== 'all' && loan.category !== reportType) return false;
+    if (dateFrom && loan.createdAt < dateFrom) return false;
+    if (dateTo && loan.createdAt > dateTo) return false;
+    return true;
+  });
+
+  const totalAmount = filteredLoans.reduce((sum, l) => sum + l.totalAmount, 0);
+  const activeLoans = filteredLoans.filter((l) => l.status === 'active');
+  const paidLoans = filteredLoans.filter((l) => l.status === 'paid');
+  const overdueLoans = filteredLoans.filter((l) => l.status === 'overdue');
+
+  const handleExportCSV = () => {
+    const csv = [
+      ['Laporan Koperasi Desa Merah Putih'],
+      ['Periode:', dateFrom || 'Awal', '-', dateTo || 'Sekarang'],
+      [''],
+      ['No', 'ID', 'Anggota', 'Kategori', 'Total', 'Status', 'Tanggal'],
+      ...filteredLoans.map((l, i) => [
+        i + 1,
+        l.id,
+        l.memberName,
+        CATEGORY_LABELS[l.category],
+        l.totalAmount,
+        l.status,
+        l.createdAt,
+      ]),
+      [''],
+      ['Total Pinjaman:', totalAmount],
+    ]
+      .map((row) => row.join(','))
+      .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `laporan-koperasi-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  };
+
+  return (
+    <MainLayout title="Laporan" subtitle="Laporan dan statistik koperasi">
+      {/* Filters */}
+      <div className="rounded-xl border border-border bg-card p-6 mb-6">
+        <h3 className="font-semibold text-foreground mb-4">Filter Laporan</h3>
+        <div className="grid gap-4 md:grid-cols-4">
+          <div className="space-y-2">
+            <Label>Kategori</Label>
+            <Select value={reportType} onValueChange={setReportType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Semua kategori" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Kategori</SelectItem>
+                {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Dari Tanggal</Label>
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Sampai Tanggal</Label>
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+            />
+          </div>
+          <div className="flex items-end gap-2">
+            <Button variant="outline" onClick={handleExportCSV}>
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+            <Button className="gradient-primary" onClick={() => handlePrint()}>
+              <Printer className="h-4 w-4 mr-2" />
+              Cetak
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Report Content */}
+      <div ref={reportRef} className="rounded-xl border border-border bg-card p-8">
+        {/* Header */}
+        <div className="text-center mb-8 print:mb-4">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-12 w-12 rounded-xl gradient-primary flex items-center justify-center">
+              <span className="text-2xl font-bold text-primary-foreground">K</span>
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">KOPERASI DESA MERAH PUTIH</h1>
+          <p className="text-muted-foreground">Jl. Raya Desa No. 123, Kec. Maju Jaya</p>
+          <div className="mt-4 py-2 border-y border-border">
+            <h2 className="text-lg font-semibold">LAPORAN PINJAMAN</h2>
+            <p className="text-sm text-muted-foreground">
+              Periode: {dateFrom || 'Awal'} - {dateTo || new Date().toLocaleDateString('id-ID')}
+            </p>
+          </div>
+        </div>
+
+        {/* Summary Stats */}
+        <div className="grid gap-4 md:grid-cols-4 mb-8">
+          <div className="p-4 rounded-lg bg-secondary">
+            <p className="text-sm text-muted-foreground">Total Pinjaman</p>
+            <p className="text-xl font-bold text-foreground">{formatCurrency(totalAmount)}</p>
+          </div>
+          <div className="p-4 rounded-lg bg-primary/10">
+            <p className="text-sm text-muted-foreground">Pinjaman Aktif</p>
+            <p className="text-xl font-bold text-primary">{activeLoans.length}</p>
+          </div>
+          <div className="p-4 rounded-lg bg-success/10">
+            <p className="text-sm text-muted-foreground">Lunas</p>
+            <p className="text-xl font-bold text-success">{paidLoans.length}</p>
+          </div>
+          <div className="p-4 rounded-lg bg-destructive/10">
+            <p className="text-sm text-muted-foreground">Jatuh Tempo</p>
+            <p className="text-xl font-bold text-destructive">{overdueLoans.length}</p>
+          </div>
+        </div>
+
+        {/* Loan Details Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b-2 border-border">
+                <th className="text-left py-3 px-2">No</th>
+                <th className="text-left py-3 px-2">ID</th>
+                <th className="text-left py-3 px-2">Anggota</th>
+                <th className="text-left py-3 px-2">Kategori</th>
+                <th className="text-right py-3 px-2">Jumlah</th>
+                <th className="text-center py-3 px-2">Status</th>
+                <th className="text-left py-3 px-2">Tanggal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredLoans.map((loan, index) => (
+                <tr key={loan.id} className="border-b border-border/50">
+                  <td className="py-2 px-2">{index + 1}</td>
+                  <td className="py-2 px-2 font-mono">{loan.id}</td>
+                  <td className="py-2 px-2">{loan.memberName}</td>
+                  <td className="py-2 px-2">{CATEGORY_LABELS[loan.category]}</td>
+                  <td className="py-2 px-2 text-right font-medium">
+                    {formatCurrency(loan.totalAmount)}
+                  </td>
+                  <td className="py-2 px-2 text-center">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        loan.status === 'active'
+                          ? 'bg-primary/10 text-primary'
+                          : loan.status === 'paid'
+                          ? 'bg-success/10 text-success'
+                          : 'bg-destructive/10 text-destructive'
+                      }`}
+                    >
+                      {loan.status === 'active' ? 'Aktif' : loan.status === 'paid' ? 'Lunas' : 'Jatuh Tempo'}
+                    </span>
+                  </td>
+                  <td className="py-2 px-2">
+                    {new Date(loan.createdAt).toLocaleDateString('id-ID')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-border font-bold">
+                <td colSpan={4} className="py-3 px-2">
+                  TOTAL
+                </td>
+                <td className="py-3 px-2 text-right text-primary">
+                  {formatCurrency(totalAmount)}
+                </td>
+                <td colSpan={2}></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 pt-4 border-t border-border text-center text-sm text-muted-foreground print:mt-4">
+          <p>Dicetak pada: {new Date().toLocaleString('id-ID')}</p>
+          <p className="mt-1">Koperasi Desa Merah Putih © {new Date().getFullYear()}</p>
+        </div>
+      </div>
+    </MainLayout>
+  );
+}
