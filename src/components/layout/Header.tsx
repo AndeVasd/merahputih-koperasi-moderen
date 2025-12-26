@@ -1,4 +1,4 @@
-import { Bell, Search, User, LogOut } from 'lucide-react';
+import { Bell, Search, User, LogOut, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,9 +13,10 @@ import {
 interface HeaderProps {
   title: string;
   subtitle?: string;
+  onMenuClick?: () => void;
 }
 
-export function Header({ title, subtitle }: HeaderProps) {
+export function Header({ title, subtitle, onMenuClick }: HeaderProps) {
   const { user, isAdmin, signOut } = useAuth();
 
   const handleSignOut = async () => {
@@ -26,18 +27,30 @@ export function Header({ title, subtitle }: HeaderProps) {
   const roleLabel = isAdmin ? 'Admin' : 'Pengguna';
 
   return (
-    <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-8 no-print">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+    <header className="sticky top-0 z-30 flex h-16 lg:h-20 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-4 lg:px-8 no-print">
+      <div className="flex items-center gap-3">
+        {/* Mobile menu button */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="lg:hidden"
+          onClick={onMenuClick}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-lg lg:text-2xl font-bold text-foreground">{title}</h1>
+          {subtitle && <p className="text-xs lg:text-sm text-muted-foreground">{subtitle}</p>}
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative">
+      <div className="flex items-center gap-2 lg:gap-4">
+        {/* Search - hidden on mobile */}
+        <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Cari anggota, pinjaman..."
-            className="w-64 pl-10"
+            className="w-48 lg:w-64 pl-10"
           />
         </div>
 
@@ -50,11 +63,11 @@ export function Header({ title, subtitle }: HeaderProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-3 rounded-lg bg-secondary px-3 py-2 cursor-pointer hover:bg-secondary/80 transition-colors">
+            <div className="flex items-center gap-2 lg:gap-3 rounded-lg bg-secondary px-2 lg:px-3 py-2 cursor-pointer hover:bg-secondary/80 transition-colors">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
                 <User className="h-4 w-4 text-primary-foreground" />
               </div>
-              <div className="text-sm">
+              <div className="text-sm hidden sm:block">
                 <p className="font-medium text-foreground">{displayName}</p>
                 <p className="text-xs text-muted-foreground">{roleLabel}</p>
               </div>

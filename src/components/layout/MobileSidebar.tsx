@@ -7,9 +7,11 @@ import {
   Tractor, 
   Pill,
   FileText,
-  Settings
+  Settings,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
@@ -21,12 +23,21 @@ const menuItems = [
   { icon: FileText, label: 'Laporan', path: '/laporan' },
 ];
 
-export function Sidebar() {
+interface MobileSidebarProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function MobileSidebar({ open, onOpenChange }: MobileSidebarProps) {
   const location = useLocation();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-card no-print hidden lg:block">
-      <div className="flex h-full flex-col">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="left" className="w-72 p-0">
+        <SheetHeader className="sr-only">
+          <SheetTitle>Menu Navigasi</SheetTitle>
+        </SheetHeader>
+        
         {/* Logo */}
         <div className="flex h-20 items-center gap-3 border-b border-border px-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
@@ -46,6 +57,7 @@ export function Sidebar() {
               <NavLink
                 key={item.path}
                 to={item.path}
+                onClick={() => onOpenChange(false)}
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200',
                   isActive
@@ -61,9 +73,10 @@ export function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-border p-4">
+        <div className="absolute bottom-0 left-0 right-0 border-t border-border p-4">
           <NavLink
             to="/pengaturan"
+            onClick={() => onOpenChange(false)}
             className={cn(
               'flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200',
               location.pathname === '/pengaturan'
@@ -75,7 +88,7 @@ export function Sidebar() {
             Pengaturan
           </NavLink>
         </div>
-      </div>
-    </aside>
+      </SheetContent>
+    </Sheet>
   );
 }
