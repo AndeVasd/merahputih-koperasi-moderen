@@ -58,16 +58,10 @@ const Auth = () => {
     setIsLoading(false);
     
     if (error) {
-      let message = 'Terjadi kesalahan saat login';
-      if (error.message.includes('Invalid login credentials')) {
-        message = 'Email atau password salah';
-      } else if (error.message.includes('Email not confirmed')) {
-        message = 'Email belum dikonfirmasi';
-      }
-      
+      // Generic error message to prevent user enumeration attacks
       toast({
         title: 'Login Gagal',
-        description: message,
+        description: 'Email atau password tidak valid. Silakan coba lagi.',
         variant: 'destructive',
       });
     } else {
@@ -97,14 +91,10 @@ const Auth = () => {
     setIsLoading(false);
     
     if (error) {
-      let message = 'Terjadi kesalahan saat mendaftar';
-      if (error.message.includes('User already registered')) {
-        message = 'Email sudah terdaftar';
-      }
-      
+      // Generic error message to prevent user enumeration attacks
       toast({
         title: 'Pendaftaran Gagal',
-        description: message,
+        description: 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.',
         variant: 'destructive',
       });
     } else {
