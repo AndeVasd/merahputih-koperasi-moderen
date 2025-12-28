@@ -1,22 +1,32 @@
-import { useState } from 'react';
-import { LoanCategory, LoanItem, Member, CATEGORY_LABELS } from '@/types/koperasi';
+import { useState, useEffect } from 'react';
+import { LoanCategory, LoanItem, CATEGORY_LABELS } from '@/types/koperasi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { mockMembers } from '@/data/mockData';
+import { useMembers } from '@/hooks/useMembers';
 
 interface LoanFormProps {
   open: boolean;
   onClose: () => void;
   category: LoanCategory;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: {
+    member_id: string;
+    category: string;
+    total_amount: number;
+    interest_rate: number;
+    due_date: string;
+    notes?: string;
+    items: { name: string; quantity: number; unit: string; price: number }[];
+  }) => Promise<void>;
+  isSubmitting?: boolean;
 }
 
-export function LoanForm({ open, onClose, category, onSubmit }: LoanFormProps) {
+export function LoanForm({ open, onClose, category, onSubmit, isSubmitting }: LoanFormProps) {
+  const { members, loading: loadingMembers } = useMembers();
   const [memberId, setMemberId] = useState('');
   const [items, setItems] = useState<Partial<LoanItem>[]>([
     { name: '', quantity: 1, unit: '', pricePerUnit: 0 },
@@ -24,6 +34,17 @@ export function LoanForm({ open, onClose, category, onSubmit }: LoanFormProps) {
   const [interestRate, setInterestRate] = useState('1');
   const [dueDate, setDueDate] = useState('');
   const [notes, setNotes] = useState('');
+
+  // Reset form when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setMemberId('');
+      setItems([{ name: '', quantity: 1, unit: '', pricePerUnit: 0 }]);
+      setInterestRate('1');
+      setDueDate('');
+      setNotes('');
+    }
+  }, [open]);
 
   const addItem = () => {
     setItems([...items, { name: '', quantity: 1, unit: '', pricePerUnit: 0 }]);
@@ -53,19 +74,26 @@ export function LoanForm({ open, onClose, category, onSubmit }: LoanFormProps) {
     }).format(value);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const member = mockMembers.find((m) => m.id === memberId);
-    onSubmit({
-      memberId,
-      memberName: member?.name || '',
+    
+    await onSubmit({
+      member_id: memberId,
       category,
-      items,
-      totalAmount: calculateTotal(),
-      interestRate: parseFloat(interestRate),
-      dueDate,
-      notes,
+      total_amount: calculateTotal(),
+      interest_rate: parseFloat(interestRate),
+      due_date: dueDate,
+      notes: notes || undefined,
+      items: items
+        .filter((item) => item.name)
+        .map((item) => ({
+          name: item.name || '',
+          quantity: item.quantity || 1,
+          unit: item.unit || 'pcs',
+          price: item.pricePerUnit || 0,
+        })),
     });
+    
     onClose();
   };
 
@@ -80,12 +108,12 @@ export function LoanForm({ open, onClose, category, onSubmit }: LoanFormProps) {
           {/* Member Selection */}
           <div className="space-y-2">
             <Label>Pilih Anggota</Label>
-            <Select value={memberId} onValueChange={setMemberId}>
+            <Select value={memberId} onValueChange={setMemberId} required>
               <SelectTrigger>
-                <SelectValue placeholder="Pilih anggota..." />
+                <SelectValue placeholder={loadingMembers ? 'Memuat...' : 'Pilih anggota...'} />
               </SelectTrigger>
               <SelectContent>
-                {mockMembers.map((member) => (
+                {members.map((member) => (
                   <SelectItem key={member.id} value={member.id}>
                     {member.name} - {member.nik}
                   </SelectItem>
@@ -112,6 +140,7 @@ export function LoanForm({ open, onClose, category, onSubmit }: LoanFormProps) {
                     placeholder="Nama item..."
                     value={item.name || ''}
                     onChange={(e) => updateItem(index, 'name', e.target.value)}
+                    required
                   />
                 </div>
                 <div className="col-span-2">
@@ -121,6 +150,7 @@ export function LoanForm({ open, onClose, category, onSubmit }: LoanFormProps) {
                     min="1"
                     value={item.quantity || ''}
                     onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value))}
+                    required
                   />
                 </div>
                 <div className="col-span-2">
@@ -129,6 +159,7 @@ export function LoanForm({ open, onClose, category, onSubmit }: LoanFormProps) {
                     placeholder="kg, pcs..."
                     value={item.unit || ''}
                     onChange={(e) => updateItem(index, 'unit', e.target.value)}
+                    required
                   />
                 </div>
                 <div className="col-span-3">
@@ -138,6 +169,7 @@ export function LoanForm({ open, onClose, category, onSubmit }: LoanFormProps) {
                     min="0"
                     value={item.pricePerUnit || ''}
                     onChange={(e) => updateItem(index, 'pricePerUnit', parseInt(e.target.value))}
+                    required
                   />
                 </div>
                 <div className="col-span-1 flex items-end">
@@ -167,6 +199,7 @@ export function LoanForm({ open, onClose, category, onSubmit }: LoanFormProps) {
                 step="0.1"
                 value={interestRate}
                 onChange={(e) => setInterestRate(e.target.value)}
+                required
               />
             </div>
             <div className="space-y-2">
@@ -175,6 +208,7 @@ export function LoanForm({ open, onClose, category, onSubmit }: LoanFormProps) {
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
+                required
               />
             </div>
           </div>
@@ -204,7 +238,8 @@ export function LoanForm({ open, onClose, category, onSubmit }: LoanFormProps) {
             <Button type="button" variant="outline" onClick={onClose}>
               Batal
             </Button>
-            <Button type="submit" className="gradient-primary">
+            <Button type="submit" className="gradient-primary" disabled={isSubmitting || !memberId}>
+              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Simpan Pinjaman
             </Button>
           </div>

@@ -108,6 +108,9 @@ export const getDashboardStats = () => {
     sembako: 0,
     alat_pertanian: 0,
     obat: 0,
+    barang: 0,
+    elektronik: 0,
+    kendaraan: 0,
   };
   
   mockLoans.forEach(loan => {

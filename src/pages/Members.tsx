@@ -5,16 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Download, Upload, Search } from 'lucide-react';
-import { mockMembers } from '@/data/mockData';
-import { Member } from '@/types/koperasi';
+import { Plus, Download, Search, Loader2 } from 'lucide-react';
+import { useMembers, DbMember } from '@/hooks/useMembers';
 import { toast } from 'sonner';
 
 export default function Members() {
-  const [members, setMembers] = useState<Member[]>(mockMembers);
+  const { members, loading, addMember, updateMember, deleteMember } = useMembers();
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingMember, setEditingMember] = useState<Member | null>(null);
+  const [editingMember, setEditingMember] = useState<DbMember | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     nik: '',
@@ -26,57 +26,70 @@ export default function Members() {
     (member) =>
       member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       member.nik.includes(searchQuery) ||
-      member.phone.includes(searchQuery)
+      (member.phone && member.phone.includes(searchQuery))
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Transform DbMember to Member format for table
+  const transformedMembers = filteredMembers.map((m) => ({
+    id: m.id,
+    name: m.name,
+    nik: m.nik,
+    address: m.address || '',
+    phone: m.phone || '',
+    joinDate: m.join_date,
+  }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (editingMember) {
-      setMembers(members.map(m => 
-        m.id === editingMember.id 
-          ? { ...m, ...formData }
-          : m
-      ));
-      toast.success('Data anggota berhasil diperbarui');
-    } else {
-      const newMember: Member = {
-        id: (members.length + 1).toString(),
-        ...formData,
-        joinDate: new Date().toISOString().split('T')[0],
-      };
-      setMembers([...members, newMember]);
-      toast.success('Anggota baru berhasil ditambahkan');
+    setIsSubmitting(true);
+
+    try {
+      if (editingMember) {
+        await updateMember(editingMember.id, formData);
+      } else {
+        await addMember(formData);
+      }
+      setIsFormOpen(false);
+      setEditingMember(null);
+      setFormData({ name: '', nik: '', address: '', phone: '' });
+    } catch (err) {
+      // Error is already handled in the hook
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsFormOpen(false);
-    setEditingMember(null);
-    setFormData({ name: '', nik: '', address: '', phone: '' });
   };
 
-  const handleEdit = (member: Member) => {
-    setEditingMember(member);
-    setFormData({
-      name: member.name,
-      nik: member.nik,
-      address: member.address,
-      phone: member.phone,
-    });
-    setIsFormOpen(true);
+  const handleEdit = (member: { id: string; name: string; nik: string; address: string; phone: string }) => {
+    const dbMember = members.find((m) => m.id === member.id);
+    if (dbMember) {
+      setEditingMember(dbMember);
+      setFormData({
+        name: dbMember.name,
+        nik: dbMember.nik,
+        address: dbMember.address || '',
+        phone: dbMember.phone || '',
+      });
+      setIsFormOpen(true);
+    }
   };
 
-  const handleDelete = (member: Member) => {
+  const handleDelete = async (member: { id: string; name: string }) => {
     if (confirm(`Apakah Anda yakin ingin menghapus ${member.name}?`)) {
-      setMembers(members.filter(m => m.id !== member.id));
-      toast.success('Anggota berhasil dihapus');
+      try {
+        await deleteMember(member.id);
+      } catch (err) {
+        // Error is already handled in the hook
+      }
     }
   };
 
   const handleExport = () => {
     const csv = [
       ['ID', 'Nama', 'NIK', 'Alamat', 'Telepon', 'Tanggal Bergabung'],
-      ...members.map(m => [m.id, m.name, m.nik, m.address, m.phone, m.joinDate])
-    ].map(row => row.join(',')).join('\n');
+      ...members.map((m) => [m.id, m.name, m.nik, m.address || '', m.phone || '', m.join_date]),
+    ]
+      .map((row) => row.join(','))
+      .join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -113,19 +126,23 @@ export default function Members() {
       </div>
 
       {/* Members Table */}
-      <MemberTable
-        members={filteredMembers}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <MemberTable
+          members={transformedMembers}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      )}
 
       {/* Member Form Modal */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editingMember ? 'Edit Anggota' : 'Tambah Anggota Baru'}
-            </DialogTitle>
+            <DialogTitle>{editingMember ? 'Edit Anggota' : 'Tambah Anggota Baru'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -169,7 +186,8 @@ export default function Members() {
               <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)}>
                 Batal
               </Button>
-              <Button type="submit" className="gradient-primary">
+              <Button type="submit" className="gradient-primary" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 {editingMember ? 'Simpan Perubahan' : 'Tambah Anggota'}
               </Button>
             </div>

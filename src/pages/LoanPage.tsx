@@ -7,8 +7,8 @@ import { ReceiptModal } from '@/components/receipt/ReceiptModal';
 import { LoanReceipt } from '@/components/receipt/LoanReceipt';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Filter, Download } from 'lucide-react';
-import { mockLoans } from '@/data/mockData';
+import { Plus, Search, Download, Loader2 } from 'lucide-react';
+import { useLoans, LoanInput } from '@/hooks/useLoans';
 import { Loan, LoanCategory, CATEGORY_LABELS } from '@/types/koperasi';
 import { toast } from 'sonner';
 import { useReactToPrint } from 'react-to-print';
@@ -20,13 +20,27 @@ const categoryMap: Record<string, LoanCategory> = {
   obat: 'obat',
 };
 
+// Map database category to LoanCategory type
+const dbCategoryMap: Record<string, LoanCategory> = {
+  uang: 'uang',
+  barang: 'sembako',
+  elektronik: 'alat_pertanian',
+  kendaraan: 'obat',
+};
+
 export default function LoanPage() {
   const { category: urlCategory } = useParams<{ category: string }>();
   const category = categoryMap[urlCategory || 'uang'] || 'uang';
   
-  const [loans, setLoans] = useState<Loan[]>(mockLoans);
+  // Map frontend category to database category
+  const dbCategory = category === 'sembako' ? 'barang' : 
+                     category === 'alat_pertanian' ? 'elektronik' : 
+                     category === 'obat' ? 'kendaraan' : 'uang';
+  
+  const { loans, loading, addLoan } = useLoans(dbCategory);
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [loanToPrint, setLoanToPrint] = useState<Loan | null>(null);
   
@@ -38,22 +52,43 @@ export default function LoanPage() {
     onAfterPrint: () => setLoanToPrint(null),
   });
 
-  const filteredLoans = loans.filter(
+  // Transform database loans to frontend format
+  const transformedLoans: Loan[] = loans.map((loan) => ({
+    id: loan.id,
+    memberId: loan.member_id,
+    memberName: loan.members?.name || 'Unknown',
+    category: dbCategoryMap[loan.category] || 'uang',
+    items: (loan.loan_items || []).map((item) => ({
+      id: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+      pricePerUnit: item.price,
+    })),
+    totalAmount: Number(loan.total_amount),
+    interestRate: Number(loan.interest_rate),
+    dueDate: loan.due_date,
+    createdAt: loan.created_at.split('T')[0],
+    status: loan.status,
+    notes: loan.notes || undefined,
+  }));
+
+  const filteredLoans = transformedLoans.filter(
     (loan) =>
-      loan.category === category &&
-      (loan.memberName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        loan.id.toLowerCase().includes(searchQuery.toLowerCase()))
+      loan.memberName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      loan.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleAddLoan = (data: any) => {
-    const newLoan: Loan = {
-      id: `L${String(loans.length + 1).padStart(3, '0')}`,
-      ...data,
-      createdAt: new Date().toISOString().split('T')[0],
-      status: 'active',
-    };
-    setLoans([...loans, newLoan]);
-    toast.success('Pinjaman berhasil ditambahkan');
+  const handleAddLoan = async (data: LoanInput) => {
+    setIsSubmitting(true);
+    try {
+      await addLoan({
+        ...data,
+        category: dbCategory,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePrintLoan = (loan: Loan) => {
@@ -143,11 +178,17 @@ export default function LoanPage() {
       </div>
 
       {/* Loans Table */}
-      <LoanTable
-        loans={filteredLoans}
-        onViewReceipt={(loan) => setSelectedLoan(loan)}
-        onPrint={handlePrintLoan}
-      />
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <LoanTable
+          loans={filteredLoans}
+          onViewReceipt={(loan) => setSelectedLoan(loan)}
+          onPrint={handlePrintLoan}
+        />
+      )}
 
       {/* Loan Form */}
       <LoanForm
@@ -155,6 +196,7 @@ export default function LoanPage() {
         onClose={() => setIsFormOpen(false)}
         category={category}
         onSubmit={handleAddLoan}
+        isSubmitting={isSubmitting}
       />
 
       {/* Receipt Modal */}
