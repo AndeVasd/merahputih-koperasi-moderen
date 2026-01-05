@@ -81,7 +81,7 @@ export function useMembers() {
         .single();
 
       if (error) throw error;
-      setMembers((prev) => prev.map((m) => (m.id === id ? data : m)));
+      // Don't manually update state - let realtime subscription handle it
       toast.success('Data anggota berhasil diperbarui');
       return data;
     } catch (err: any) {
@@ -95,7 +95,7 @@ export function useMembers() {
       const { error } = await supabase.from('members').delete().eq('id', id);
 
       if (error) throw error;
-      setMembers((prev) => prev.filter((m) => m.id !== id));
+      // Don't manually update state - let realtime subscription handle it
       toast.success('Anggota berhasil dihapus');
     } catch (err: any) {
       toast.error('Gagal menghapus anggota: ' + err.message);
