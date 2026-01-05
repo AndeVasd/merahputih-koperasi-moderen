@@ -131,7 +131,7 @@ export function useLoans(category?: string) {
         loan_items: itemsData,
       };
 
-      setLoans((prev) => [newLoan, ...prev]);
+      // Don't manually update state - let realtime subscription handle it
       toast.success('Pinjaman berhasil ditambahkan');
       return newLoan;
     } catch (err: any) {
@@ -160,7 +160,7 @@ export function useLoans(category?: string) {
         status: data.status as 'active' | 'paid' | 'overdue',
       };
       
-      setLoans((prev) => prev.map((l) => (l.id === id ? typedLoan : l)));
+      // Don't manually update state - let realtime subscription handle it
       toast.success('Status pinjaman berhasil diperbarui');
       return typedLoan;
     } catch (err: any) {
@@ -174,7 +174,7 @@ export function useLoans(category?: string) {
       const { error } = await supabase.from('loans').delete().eq('id', id);
 
       if (error) throw error;
-      setLoans((prev) => prev.filter((l) => l.id !== id));
+      // Don't manually update state - let realtime subscription handle it
       toast.success('Pinjaman berhasil dihapus');
     } catch (err: any) {
       toast.error('Gagal menghapus pinjaman: ' + err.message);
