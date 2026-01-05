@@ -3,14 +3,16 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { CategoryCard } from '@/components/dashboard/CategoryCard';
 import { RecentLoans } from '@/components/dashboard/RecentLoans';
+import { LoanChart } from '@/components/dashboard/LoanChart';
 import { ReceiptModal } from '@/components/receipt/ReceiptModal';
-import { Users, Wallet, AlertTriangle, TrendingUp } from 'lucide-react';
-import { mockLoans, getDashboardStats } from '@/data/mockData';
+import { Users, Wallet, AlertTriangle, TrendingUp, CheckCircle } from 'lucide-react';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { Loan, LoanCategory } from '@/types/koperasi';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Dashboard() {
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
-  const stats = getDashboardStats();
+  const { stats, loans, loading } = useDashboardStats();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -23,19 +25,62 @@ export default function Dashboard() {
 
   const categories: LoanCategory[] = ['uang', 'sembako', 'alat_pertanian', 'obat'];
 
+  // Transform DbLoan to Loan for RecentLoans and ReceiptModal
+  const transformedLoans: Loan[] = loans.slice(0, 5).map((loan) => ({
+    id: loan.id,
+    memberId: loan.member_id,
+    memberName: loan.members?.name || 'Unknown',
+    category: loan.category as LoanCategory,
+    items: (loan.loan_items || []).map((item) => ({
+      id: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+      pricePerUnit: item.price,
+    })),
+    totalAmount: loan.total_amount,
+    interestRate: loan.interest_rate,
+    dueDate: loan.due_date,
+    status: loan.status,
+    notes: loan.notes || undefined,
+    createdAt: loan.created_at,
+  }));
+
+  const getCategoryCount = (category: string) => {
+    return loans.filter((l) => l.category === category && l.status === 'active').length;
+  };
+
+  if (loading) {
+    return (
+      <MainLayout
+        title="Dashboard"
+        subtitle="Selamat datang di Sistem Koperasi Desa Merah Putih"
+      >
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
+          ))}
+        </div>
+        <div className="grid gap-6 lg:grid-cols-2 mb-8">
+          <Skeleton className="h-[380px] rounded-xl" />
+          <Skeleton className="h-[380px] rounded-xl" />
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout
       title="Dashboard"
       subtitle="Selamat datang di Sistem Koperasi Desa Merah Putih"
     >
       {/* Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mb-8">
         <StatCard
           title="Total Anggota"
           value={stats.totalMembers}
-          subtitle="Anggota aktif"
+          subtitle="Anggota terdaftar"
           icon={Users}
-          trend={{ value: 12, isPositive: true }}
           variant="primary"
         />
         <StatCard
@@ -53,12 +98,25 @@ export default function Dashboard() {
           variant="accent"
         />
         <StatCard
+          title="Lunas"
+          value={stats.paidLoans}
+          subtitle="Sudah dibayar"
+          icon={CheckCircle}
+          variant="success"
+        />
+        <StatCard
           title="Jatuh Tempo"
           value={stats.overdueLoans}
           subtitle="Perlu perhatian"
           icon={AlertTriangle}
-          variant="default"
+          variant="warning"
         />
+      </div>
+
+      {/* Charts */}
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-foreground mb-4">Statistik Pinjaman</h2>
+        <LoanChart loans={loans} />
       </div>
 
       {/* Category Cards */}
@@ -70,7 +128,7 @@ export default function Dashboard() {
               key={category}
               category={category}
               amount={stats.loansByCategory[category]}
-              count={mockLoans.filter((l) => l.category === category && l.status === 'active').length}
+              count={getCategoryCount(category)}
             />
           ))}
         </div>
@@ -78,7 +136,7 @@ export default function Dashboard() {
 
       {/* Recent Loans */}
       <RecentLoans
-        loans={mockLoans.slice(0, 5)}
+        loans={transformedLoans}
         onViewReceipt={(loan) => setSelectedLoan(loan)}
       />
 
