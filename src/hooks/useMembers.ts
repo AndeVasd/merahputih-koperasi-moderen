@@ -57,7 +57,7 @@ export function useMembers() {
         .single();
 
       if (error) throw error;
-      setMembers((prev) => [data, ...prev]);
+      // Don't manually update state - let realtime subscription handle it
       toast.success('Anggota baru berhasil ditambahkan');
       return data;
     } catch (err: any) {
