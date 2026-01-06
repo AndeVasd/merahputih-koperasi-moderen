@@ -18,9 +18,6 @@ const categoryMap: Record<string, LoanCategory> = {
   sembako: 'sembako',
   'alat-pertanian': 'alat_pertanian',
   obat: 'obat',
-  barang: 'barang',
-  elektronik: 'elektronik',
-  kendaraan: 'kendaraan',
 };
 
 export default function LoanPage() {

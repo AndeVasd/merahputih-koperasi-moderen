@@ -13,9 +13,6 @@ const categoryPaths: Record<LoanCategory, string> = {
   sembako: '/pinjaman/sembako',
   alat_pertanian: '/pinjaman/alat-pertanian',
   obat: '/pinjaman/obat',
-  barang: '/pinjaman/barang',
-  elektronik: '/pinjaman/elektronik',
-  kendaraan: '/pinjaman/kendaraan',
 };
 
 export function CategoryCard({ category, amount, count }: CategoryCardProps) {
