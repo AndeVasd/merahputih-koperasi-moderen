@@ -14,6 +14,18 @@ export interface DashboardStats {
     sembako: number;
     alat_pertanian: number;
     obat: number;
+    barang: number;
+    elektronik: number;
+    kendaraan: number;
+  };
+  countByCategory: {
+    uang: number;
+    sembako: number;
+    alat_pertanian: number;
+    obat: number;
+    barang: number;
+    elektronik: number;
+    kendaraan: number;
   };
 }
 
@@ -55,12 +67,17 @@ export function useDashboardStats() {
     const overdueLoans = loans.filter((l) => l.status === 'overdue');
     const paidLoans = loans.filter((l) => l.status === 'paid');
 
-    const loansByCategory = {
-      uang: loans.filter((l) => l.category === 'uang').reduce((sum, l) => sum + l.total_amount, 0),
-      sembako: loans.filter((l) => l.category === 'sembako').reduce((sum, l) => sum + l.total_amount, 0),
-      alat_pertanian: loans.filter((l) => l.category === 'alat_pertanian').reduce((sum, l) => sum + l.total_amount, 0),
-      obat: loans.filter((l) => l.category === 'obat').reduce((sum, l) => sum + l.total_amount, 0),
-    };
+    const categories = ['uang', 'sembako', 'alat_pertanian', 'obat', 'barang', 'elektronik', 'kendaraan'] as const;
+    
+    const loansByCategory = categories.reduce((acc, cat) => {
+      acc[cat] = loans.filter((l) => l.category === cat && l.status === 'active').reduce((sum, l) => sum + l.total_amount, 0);
+      return acc;
+    }, {} as Record<typeof categories[number], number>);
+
+    const countByCategory = categories.reduce((acc, cat) => {
+      acc[cat] = loans.filter((l) => l.category === cat && l.status === 'active').length;
+      return acc;
+    }, {} as Record<typeof categories[number], number>);
 
     return {
       totalMembers: members.length,
@@ -70,6 +87,7 @@ export function useDashboardStats() {
       overdueLoans: overdueLoans.length,
       paidLoans: paidLoans.length,
       loansByCategory,
+      countByCategory,
     };
   }, [members, loans]);
 

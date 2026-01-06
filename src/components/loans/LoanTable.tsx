@@ -1,7 +1,7 @@
 import { Loan, CATEGORY_LABELS, CATEGORY_ICONS } from '@/types/koperasi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Printer, MoreHorizontal } from 'lucide-react';
+import { Eye, Printer, MoreHorizontal, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Table,
@@ -15,6 +15,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
@@ -22,6 +23,7 @@ interface LoanTableProps {
   loans: Loan[];
   onViewReceipt: (loan: Loan) => void;
   onPrint: (loan: Loan) => void;
+  onUpdateStatus?: (loanId: string, status: 'active' | 'paid' | 'overdue') => void;
 }
 
 const statusStyles = {
@@ -36,7 +38,7 @@ const statusLabels = {
   overdue: 'Jatuh Tempo',
 };
 
-export function LoanTable({ loans, onViewReceipt, onPrint }: LoanTableProps) {
+export function LoanTable({ loans, onViewReceipt, onPrint, onUpdateStatus }: LoanTableProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -118,6 +120,38 @@ export function LoanTable({ loans, onViewReceipt, onPrint }: LoanTableProps) {
                       <Printer className="h-4 w-4 mr-2" />
                       Cetak Struk
                     </DropdownMenuItem>
+                    {onUpdateStatus && (
+                      <>
+                        <DropdownMenuSeparator />
+                        {loan.status !== 'paid' && (
+                          <DropdownMenuItem 
+                            onClick={() => onUpdateStatus(loan.id, 'paid')}
+                            className="text-success"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Tandai Lunas
+                          </DropdownMenuItem>
+                        )}
+                        {loan.status !== 'active' && (
+                          <DropdownMenuItem 
+                            onClick={() => onUpdateStatus(loan.id, 'active')}
+                            className="text-primary"
+                          >
+                            <Clock className="h-4 w-4 mr-2" />
+                            Tandai Aktif
+                          </DropdownMenuItem>
+                        )}
+                        {loan.status !== 'overdue' && (
+                          <DropdownMenuItem 
+                            onClick={() => onUpdateStatus(loan.id, 'overdue')}
+                            className="text-destructive"
+                          >
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Tandai Jatuh Tempo
+                          </DropdownMenuItem>
+                        )}
+                      </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

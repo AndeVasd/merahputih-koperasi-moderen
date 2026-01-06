@@ -1,19 +1,22 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Printer, FileText, Calendar } from 'lucide-react';
-import { mockLoans, mockMembers } from '@/data/mockData';
+import { Download, Printer } from 'lucide-react';
 import { CATEGORY_LABELS, LoanCategory } from '@/types/koperasi';
 import { useReactToPrint } from 'react-to-print';
+import { useLoans } from '@/hooks/useLoans';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Reports() {
   const [reportType, setReportType] = useState<string>('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const reportRef = useRef<HTMLDivElement>(null);
+
+  const { loans, loading } = useLoans();
 
   const handlePrint = useReactToPrint({
     contentRef: reportRef,
@@ -28,14 +31,17 @@ export default function Reports() {
     }).format(value);
   };
 
-  const filteredLoans = mockLoans.filter((loan) => {
-    if (reportType !== 'all' && loan.category !== reportType) return false;
-    if (dateFrom && loan.createdAt < dateFrom) return false;
-    if (dateTo && loan.createdAt > dateTo) return false;
-    return true;
-  });
+  const filteredLoans = useMemo(() => {
+    return loans.filter((loan) => {
+      if (reportType !== 'all' && loan.category !== reportType) return false;
+      const loanDate = loan.created_at.split('T')[0];
+      if (dateFrom && loanDate < dateFrom) return false;
+      if (dateTo && loanDate > dateTo) return false;
+      return true;
+    });
+  }, [loans, reportType, dateFrom, dateTo]);
 
-  const totalAmount = filteredLoans.reduce((sum, l) => sum + l.totalAmount, 0);
+  const totalAmount = filteredLoans.reduce((sum, l) => sum + l.total_amount, 0);
   const activeLoans = filteredLoans.filter((l) => l.status === 'active');
   const paidLoans = filteredLoans.filter((l) => l.status === 'paid');
   const overdueLoans = filteredLoans.filter((l) => l.status === 'overdue');
@@ -49,11 +55,11 @@ export default function Reports() {
       ...filteredLoans.map((l, i) => [
         i + 1,
         l.id,
-        l.memberName,
-        CATEGORY_LABELS[l.category],
-        l.totalAmount,
+        l.members?.name || 'Unknown',
+        CATEGORY_LABELS[l.category as LoanCategory] || l.category,
+        l.total_amount,
         l.status,
-        l.createdAt,
+        l.created_at.split('T')[0],
       ]),
       [''],
       ['Total Pinjaman:', totalAmount],
@@ -68,6 +74,22 @@ export default function Reports() {
     a.download = `laporan-koperasi-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
   };
+
+  if (loading) {
+    return (
+      <MainLayout title="Laporan" subtitle="Laporan dan statistik koperasi">
+        <div className="rounded-xl border border-border bg-card p-6 mb-6">
+          <Skeleton className="h-6 w-32 mb-4" />
+          <div className="grid gap-4 md:grid-cols-4">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-10" />
+            ))}
+          </div>
+        </div>
+        <Skeleton className="h-96 rounded-xl" />
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout title="Laporan" subtitle="Laporan dan statistik koperasi">
@@ -177,11 +199,11 @@ export default function Reports() {
               {filteredLoans.map((loan, index) => (
                 <tr key={loan.id} className="border-b border-border/50">
                   <td className="py-2 px-2">{index + 1}</td>
-                  <td className="py-2 px-2 font-mono">{loan.id}</td>
-                  <td className="py-2 px-2">{loan.memberName}</td>
-                  <td className="py-2 px-2">{CATEGORY_LABELS[loan.category]}</td>
+                  <td className="py-2 px-2 font-mono text-xs">{loan.id.slice(0, 8)}</td>
+                  <td className="py-2 px-2">{loan.members?.name || 'Unknown'}</td>
+                  <td className="py-2 px-2">{CATEGORY_LABELS[loan.category as LoanCategory] || loan.category}</td>
                   <td className="py-2 px-2 text-right font-medium">
-                    {formatCurrency(loan.totalAmount)}
+                    {formatCurrency(loan.total_amount)}
                   </td>
                   <td className="py-2 px-2 text-center">
                     <span
@@ -197,7 +219,7 @@ export default function Reports() {
                     </span>
                   </td>
                   <td className="py-2 px-2">
-                    {new Date(loan.createdAt).toLocaleDateString('id-ID')}
+                    {new Date(loan.created_at).toLocaleDateString('id-ID')}
                   </td>
                 </tr>
               ))}
