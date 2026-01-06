@@ -27,7 +27,7 @@ export default function LoanPage() {
   // Use the frontend category directly as database category (they're the same)
   const dbCategory = category;
   
-  const { loans, loading, addLoan, updateLoanStatus } = useLoans(dbCategory);
+  const { loans, loading, addLoan, updateLoanStatus, deleteLoan } = useLoans(dbCategory);
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -178,6 +178,7 @@ export default function LoanPage() {
           onViewReceipt={(loan) => setSelectedLoan(loan)}
           onPrint={handlePrintLoan}
           onUpdateStatus={updateLoanStatus}
+          onDelete={deleteLoan}
         />
       )}
 

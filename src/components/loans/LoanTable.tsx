@@ -1,7 +1,7 @@
 import { Loan, CATEGORY_LABELS, CATEGORY_ICONS } from '@/types/koperasi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Printer, MoreHorizontal, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Eye, Printer, MoreHorizontal, CheckCircle, XCircle, Clock, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Table,
@@ -18,12 +18,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface LoanTableProps {
   loans: Loan[];
   onViewReceipt: (loan: Loan) => void;
   onPrint: (loan: Loan) => void;
   onUpdateStatus?: (loanId: string, status: 'active' | 'paid' | 'overdue') => void;
+  onDelete?: (loanId: string) => void;
 }
 
 const statusStyles = {
@@ -38,7 +50,7 @@ const statusLabels = {
   overdue: 'Jatuh Tempo',
 };
 
-export function LoanTable({ loans, onViewReceipt, onPrint, onUpdateStatus }: LoanTableProps) {
+export function LoanTable({ loans, onViewReceipt, onPrint, onUpdateStatus, onDelete }: LoanTableProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -150,6 +162,39 @@ export function LoanTable({ loans, onViewReceipt, onPrint, onUpdateStatus }: Loa
                             Tandai Jatuh Tempo
                           </DropdownMenuItem>
                         )}
+                      </>
+                    )}
+                    {onDelete && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem 
+                              onSelect={(e) => e.preventDefault()}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Hapus Pinjaman
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Hapus Pinjaman?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Anda yakin ingin menghapus pinjaman ini? Tindakan ini tidak dapat dibatalkan.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Batal</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => onDelete(loan.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Hapus
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </>
                     )}
                   </DropdownMenuContent>
