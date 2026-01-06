@@ -18,26 +18,19 @@ const categoryMap: Record<string, LoanCategory> = {
   sembako: 'sembako',
   'alat-pertanian': 'alat_pertanian',
   obat: 'obat',
-};
-
-// Map database category to LoanCategory type
-const dbCategoryMap: Record<string, LoanCategory> = {
-  uang: 'uang',
-  barang: 'sembako',
-  elektronik: 'alat_pertanian',
-  kendaraan: 'obat',
+  barang: 'barang',
+  elektronik: 'elektronik',
+  kendaraan: 'kendaraan',
 };
 
 export default function LoanPage() {
   const { category: urlCategory } = useParams<{ category: string }>();
   const category = categoryMap[urlCategory || 'uang'] || 'uang';
   
-  // Map frontend category to database category
-  const dbCategory = category === 'sembako' ? 'barang' : 
-                     category === 'alat_pertanian' ? 'elektronik' : 
-                     category === 'obat' ? 'kendaraan' : 'uang';
+  // Use the frontend category directly as database category (they're the same)
+  const dbCategory = category;
   
-  const { loans, loading, addLoan } = useLoans(dbCategory);
+  const { loans, loading, addLoan, updateLoanStatus } = useLoans(dbCategory);
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,7 +50,7 @@ export default function LoanPage() {
     id: loan.id,
     memberId: loan.member_id,
     memberName: loan.members?.name || 'Unknown',
-    category: dbCategoryMap[loan.category] || 'uang',
+    category: loan.category as LoanCategory,
     items: (loan.loan_items || []).map((item) => ({
       id: item.id,
       name: item.name,
@@ -187,6 +180,7 @@ export default function LoanPage() {
           loans={filteredLoans}
           onViewReceipt={(loan) => setSelectedLoan(loan)}
           onPrint={handlePrintLoan}
+          onUpdateStatus={updateLoanStatus}
         />
       )}
 
