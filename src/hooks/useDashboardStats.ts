@@ -14,18 +14,12 @@ export interface DashboardStats {
     sembako: number;
     alat_pertanian: number;
     obat: number;
-    barang: number;
-    elektronik: number;
-    kendaraan: number;
   };
   countByCategory: {
     uang: number;
     sembako: number;
     alat_pertanian: number;
     obat: number;
-    barang: number;
-    elektronik: number;
-    kendaraan: number;
   };
 }
 
@@ -67,7 +61,7 @@ export function useDashboardStats() {
     const overdueLoans = loans.filter((l) => l.status === 'overdue');
     const paidLoans = loans.filter((l) => l.status === 'paid');
 
-    const categories = ['uang', 'sembako', 'alat_pertanian', 'obat', 'barang', 'elektronik', 'kendaraan'] as const;
+    const categories = ['uang', 'sembako', 'alat_pertanian', 'obat'] as const;
     
     const loansByCategory = categories.reduce((acc, cat) => {
       acc[cat] = loans.filter((l) => l.category === cat && l.status === 'active').reduce((sum, l) => sum + l.total_amount, 0);

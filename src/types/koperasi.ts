@@ -1,4 +1,4 @@
-export type LoanCategory = 'uang' | 'sembako' | 'alat_pertanian' | 'obat' | 'barang' | 'elektronik' | 'kendaraan';
+export type LoanCategory = 'uang' | 'sembako' | 'alat_pertanian' | 'obat';
 
 export interface Member {
   id: string;
@@ -44,9 +44,6 @@ export const CATEGORY_LABELS: Record<LoanCategory, string> = {
   sembako: 'Sembako',
   alat_pertanian: 'Alat Pertanian',
   obat: 'Obat-obatan',
-  barang: 'Barang',
-  elektronik: 'Elektronik',
-  kendaraan: 'Kendaraan',
 };
 
 export const CATEGORY_ICONS: Record<LoanCategory, string> = {
@@ -54,7 +51,4 @@ export const CATEGORY_ICONS: Record<LoanCategory, string> = {
   sembako: '🍚',
   alat_pertanian: '🌾',
   obat: '💊',
-  barang: '📦',
-  elektronik: '📱',
-  kendaraan: '🚗',
 };

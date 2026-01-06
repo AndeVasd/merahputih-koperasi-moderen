@@ -23,7 +23,7 @@ export default function Dashboard() {
     }).format(value);
   };
 
-  const categories: LoanCategory[] = ['uang', 'sembako', 'alat_pertanian', 'obat', 'barang', 'elektronik', 'kendaraan'];
+  const categories: LoanCategory[] = ['uang', 'sembako', 'alat_pertanian', 'obat'];
 
   // Transform DbLoan to Loan for RecentLoans and ReceiptModal
   const transformedLoans: Loan[] = loans.slice(0, 5).map((loan) => ({
@@ -118,7 +118,7 @@ export default function Dashboard() {
       {/* Category Cards */}
       <div className="mb-8">
         <h2 className="text-lg font-semibold text-foreground mb-4">Kategori Pinjaman</h2>
-        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {categories.map((category) => (
             <CategoryCard
               key={category}
