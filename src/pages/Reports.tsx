@@ -55,7 +55,7 @@ export default function Reports() {
       ...filteredLoans.map((l, i) => [
         i + 1,
         l.id,
-        l.members?.name || 'Unknown',
+        l.members?.name || l.borrower_name || 'Unknown',
         CATEGORY_LABELS[l.category as LoanCategory] || l.category,
         l.total_amount,
         l.status,
@@ -200,7 +200,7 @@ export default function Reports() {
                 <tr key={loan.id} className="border-b border-border/50">
                   <td className="py-2 px-2">{index + 1}</td>
                   <td className="py-2 px-2 font-mono text-xs">{loan.id.slice(0, 8)}</td>
-                  <td className="py-2 px-2">{loan.members?.name || 'Unknown'}</td>
+                  <td className="py-2 px-2">{loan.members?.name || loan.borrower_name || 'Unknown'}</td>
                   <td className="py-2 px-2">{CATEGORY_LABELS[loan.category as LoanCategory] || loan.category}</td>
                   <td className="py-2 px-2 text-right font-medium">
                     {formatCurrency(loan.total_amount)}

@@ -28,8 +28,8 @@ export default function Dashboard() {
   // Transform DbLoan to Loan for RecentLoans and ReceiptModal
   const transformedLoans: Loan[] = loans.slice(0, 5).map((loan) => ({
     id: loan.id,
-    memberId: loan.member_id,
-    memberName: loan.members?.name || 'Unknown',
+    memberId: loan.member_id || '',
+    memberName: loan.members?.name || loan.borrower_name || 'Unknown',
     category: loan.category as LoanCategory,
     items: (loan.loan_items || []).map((item) => ({
       id: item.id,

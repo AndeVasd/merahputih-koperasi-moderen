@@ -13,7 +13,11 @@ export interface DbLoanItem {
 
 export interface DbLoan {
   id: string;
-  member_id: string;
+  member_id: string | null;
+  borrower_name: string | null;
+  borrower_nik: string | null;
+  borrower_phone: string | null;
+  borrower_address: string | null;
   category: string;
   total_amount: number;
   interest_rate: number;
@@ -30,7 +34,11 @@ export interface DbLoan {
 }
 
 export interface LoanInput {
-  member_id: string;
+  member_id?: string;
+  borrower_name?: string;
+  borrower_nik?: string;
+  borrower_phone?: string;
+  borrower_address?: string;
   category: string;
   total_amount: number;
   interest_rate: number;
@@ -90,7 +98,11 @@ export function useLoans(category?: string) {
       const { data: loanData, error: loanError } = await supabase
         .from('loans')
         .insert({
-          member_id: loan.member_id,
+          member_id: loan.member_id || null,
+          borrower_name: loan.borrower_name || null,
+          borrower_nik: loan.borrower_nik || null,
+          borrower_phone: loan.borrower_phone || null,
+          borrower_address: loan.borrower_address || null,
           category: loan.category,
           total_amount: loan.total_amount,
           interest_rate: loan.interest_rate,
