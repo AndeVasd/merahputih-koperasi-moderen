@@ -54,36 +54,48 @@ export type Database = {
       }
       loans: {
         Row: {
+          borrower_address: string | null
+          borrower_name: string | null
+          borrower_nik: string | null
+          borrower_phone: string | null
           category: string
           created_at: string
           due_date: string
           id: string
           interest_rate: number
-          member_id: string
+          member_id: string | null
           notes: string | null
           status: string
           total_amount: number
           updated_at: string
         }
         Insert: {
+          borrower_address?: string | null
+          borrower_name?: string | null
+          borrower_nik?: string | null
+          borrower_phone?: string | null
           category: string
           created_at?: string
           due_date: string
           id?: string
           interest_rate?: number
-          member_id: string
+          member_id?: string | null
           notes?: string | null
           status?: string
           total_amount?: number
           updated_at?: string
         }
         Update: {
+          borrower_address?: string | null
+          borrower_name?: string | null
+          borrower_nik?: string | null
+          borrower_phone?: string | null
           category?: string
           created_at?: string
           due_date?: string
           id?: string
           interest_rate?: number
-          member_id?: string
+          member_id?: string | null
           notes?: string | null
           status?: string
           total_amount?: number
