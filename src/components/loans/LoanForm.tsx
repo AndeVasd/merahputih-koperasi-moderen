@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { LoanCategory, LoanItem, CATEGORY_LABELS } from '@/types/koperasi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Loader2, Upload, X, ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useMembers } from '@/hooks/useMembers';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LoanFormProps {
   open: boolean;
@@ -25,6 +26,7 @@ interface LoanFormProps {
     interest_rate: number;
     due_date: string;
     notes?: string;
+    ktp_image_url?: string;
     items: { name: string; quantity: number; unit: string; price: number }[];
   }) => Promise<void>;
   isSubmitting?: boolean;
@@ -54,6 +56,12 @@ export function LoanForm({ open, onClose, category, onSubmit, isSubmitting }: Lo
   const [interestRate, setInterestRate] = useState('1');
   const [dueDate, setDueDate] = useState('');
   const [notes, setNotes] = useState('');
+  
+  // KTP upload
+  const [ktpFile, setKtpFile] = useState<File | null>(null);
+  const [ktpPreview, setKtpPreview] = useState<string | null>(null);
+  const [uploadingKtp, setUploadingKtp] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Reset form when dialog closes
   useEffect(() => {
@@ -69,8 +77,60 @@ export function LoanForm({ open, onClose, category, onSubmit, isSubmitting }: Lo
       setInterestRate('1');
       setDueDate('');
       setNotes('');
+      setKtpFile(null);
+      setKtpPreview(null);
     }
   }, [open]);
+
+  const handleKtpSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        return;
+      }
+      setKtpFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setKtpPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeKtpFile = () => {
+    setKtpFile(null);
+    setKtpPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const uploadKtpImage = async (): Promise<string | null> => {
+    if (!ktpFile) return null;
+    
+    setUploadingKtp(true);
+    try {
+      const fileExt = ktpFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      
+      const { data, error } = await supabase.storage
+        .from('ktp-images')
+        .upload(fileName, ktpFile);
+      
+      if (error) throw error;
+      
+      const { data: publicUrlData } = supabase.storage
+        .from('ktp-images')
+        .getPublicUrl(data.path);
+      
+      return publicUrlData.publicUrl;
+    } catch (error) {
+      console.error('Error uploading KTP:', error);
+      return null;
+    } finally {
+      setUploadingKtp(false);
+    }
+  };
 
   const addItem = () => {
     setItems([...items, { name: '', quantity: 1, unit: '', pricePerUnit: 0 }]);
@@ -122,12 +182,22 @@ export function LoanForm({ open, onClose, category, onSubmit, isSubmitting }: Lo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Upload KTP image first if exists
+    let ktpImageUrl: string | undefined;
+    if (ktpFile) {
+      const uploadedUrl = await uploadKtpImage();
+      if (uploadedUrl) {
+        ktpImageUrl = uploadedUrl;
+      }
+    }
+    
     const submitData: any = {
       category,
       total_amount: calculateTotal(),
       interest_rate: parseFloat(interestRate),
       due_date: dueDate,
       notes: notes || undefined,
+      ktp_image_url: ktpImageUrl,
       items: category === 'uang' 
         ? [{ name: 'Pinjaman Uang', quantity: 1, unit: 'Rp', price: parseFloat(loanAmount) || 0 }]
         : items
@@ -223,6 +293,49 @@ export function LoanForm({ open, onClose, category, onSubmit, isSubmitting }: Lo
                       onChange={(e) => setBorrowerAddress(e.target.value)}
                     />
                   </div>
+                </div>
+                
+                {/* KTP Upload */}
+                <div className="space-y-2">
+                  <Label>Foto KTP</Label>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/*"
+                    onChange={handleKtpSelect}
+                    className="hidden"
+                  />
+                  {!ktpPreview ? (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors"
+                    >
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        Klik untuk upload foto KTP
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Format: JPG, PNG, WEBP
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="relative rounded-lg overflow-hidden border">
+                      <img
+                        src={ktpPreview}
+                        alt="Preview KTP"
+                        className="w-full h-48 object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2"
+                        onClick={removeKtpFile}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
               

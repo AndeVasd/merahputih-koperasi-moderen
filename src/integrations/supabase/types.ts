@@ -63,6 +63,7 @@ export type Database = {
           due_date: string
           id: string
           interest_rate: number
+          ktp_image_url: string | null
           member_id: string | null
           notes: string | null
           status: string
@@ -79,6 +80,7 @@ export type Database = {
           due_date: string
           id?: string
           interest_rate?: number
+          ktp_image_url?: string | null
           member_id?: string | null
           notes?: string | null
           status?: string
@@ -95,6 +97,7 @@ export type Database = {
           due_date?: string
           id?: string
           interest_rate?: number
+          ktp_image_url?: string | null
           member_id?: string | null
           notes?: string | null
           status?: string

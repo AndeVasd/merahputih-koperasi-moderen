@@ -24,6 +24,7 @@ export interface DbLoan {
   due_date: string;
   status: 'active' | 'paid' | 'overdue';
   notes: string | null;
+  ktp_image_url: string | null;
   created_at: string;
   updated_at: string;
   members?: {
@@ -44,6 +45,7 @@ export interface LoanInput {
   interest_rate: number;
   due_date: string;
   notes?: string;
+  ktp_image_url?: string;
   items: {
     name: string;
     quantity: number;
@@ -108,6 +110,7 @@ export function useLoans(category?: string) {
           interest_rate: loan.interest_rate,
           due_date: loan.due_date,
           notes: loan.notes || null,
+          ktp_image_url: loan.ktp_image_url || null,
         })
         .select(`
           *,
