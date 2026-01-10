@@ -2,6 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
+  UserCircle,
   Wallet, 
   ShoppingBasket, 
   Tractor, 
@@ -16,6 +17,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
   { icon: Users, label: 'Anggota', path: '/anggota' },
+  { icon: UserCircle, label: 'Peminjam', path: '/peminjam' },
   { icon: Wallet, label: 'Pinjaman Uang', path: '/pinjaman/uang' },
   { icon: ShoppingBasket, label: 'Sembako', path: '/pinjaman/sembako' },
   { icon: Tractor, label: 'Alat Pertanian', path: '/pinjaman/alat-pertanian' },
