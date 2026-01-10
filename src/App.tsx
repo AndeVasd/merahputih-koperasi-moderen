@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Members from "./pages/Members";
+import Borrowers from "./pages/Borrowers";
 import LoanPage from "./pages/LoanPage";
 import Reports from "./pages/Reports";
 import Auth from "./pages/Auth";
@@ -31,6 +32,11 @@ const App = () => (
             <Route path="/anggota" element={
               <ProtectedRoute>
                 <Members />
+              </ProtectedRoute>
+            } />
+            <Route path="/peminjam" element={
+              <ProtectedRoute>
+                <Borrowers />
               </ProtectedRoute>
             } />
             <Route path="/pinjaman/:category" element={
