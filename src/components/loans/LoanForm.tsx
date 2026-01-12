@@ -5,11 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Loader2, Upload, X, ImageIcon } from 'lucide-react';
+import { Plus, Trash2, Loader2, Upload, X, ImageIcon, CheckCircle, AlertCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useMembers } from '@/hooks/useMembers';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface LoanFormProps {
   open: boolean;
@@ -30,6 +31,16 @@ interface LoanFormProps {
     items: { name: string; quantity: number; unit: string; price: number }[];
   }) => Promise<void>;
   isSubmitting?: boolean;
+}
+
+interface OcrResult {
+  isValidKtp: boolean;
+  errorMessage?: string;
+  data?: {
+    nik: string;
+    nama: string;
+    alamat: string;
+  };
 }
 
 export function LoanForm({ open, onClose, category, onSubmit, isSubmitting }: LoanFormProps) {
@@ -61,6 +72,9 @@ export function LoanForm({ open, onClose, category, onSubmit, isSubmitting }: Lo
   const [ktpFile, setKtpFile] = useState<File | null>(null);
   const [ktpPreview, setKtpPreview] = useState<string | null>(null);
   const [uploadingKtp, setUploadingKtp] = useState(false);
+  const [processingOcr, setProcessingOcr] = useState(false);
+  const [ktpValidated, setKtpValidated] = useState(false);
+  const [ktpError, setKtpError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Reset form when dialog closes
@@ -79,19 +93,65 @@ export function LoanForm({ open, onClose, category, onSubmit, isSubmitting }: Lo
       setNotes('');
       setKtpFile(null);
       setKtpPreview(null);
+      setKtpValidated(false);
+      setKtpError(null);
     }
   }, [open]);
 
-  const handleKtpSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const processKtpOcr = async (imageBase64: string): Promise<OcrResult> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('ocr-ktp', {
+        body: { imageBase64 }
+      });
+      
+      if (error) throw error;
+      return data as OcrResult;
+    } catch (error) {
+      console.error('OCR Error:', error);
+      return {
+        isValidKtp: false,
+        errorMessage: 'Gagal memproses gambar. Silakan coba lagi.'
+      };
+    }
+  };
+
+  const handleKtpSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
+        toast.error('File harus berupa gambar');
         return;
       }
+      
       setKtpFile(file);
+      setKtpValidated(false);
+      setKtpError(null);
+      setProcessingOcr(true);
+      
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setKtpPreview(reader.result as string);
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
+        setKtpPreview(base64);
+        
+        // Process OCR
+        const result = await processKtpOcr(base64);
+        setProcessingOcr(false);
+        
+        if (result.isValidKtp && result.data) {
+          setKtpValidated(true);
+          setKtpError(null);
+          // Auto-fill form fields
+          setBorrowerName(result.data.nama || '');
+          setBorrowerNik(result.data.nik || '');
+          setBorrowerAddress(result.data.alamat || '');
+          toast.success('Data KTP berhasil diekstrak!');
+        } else {
+          setKtpValidated(false);
+          setKtpError(result.errorMessage || 'Gambar bukan KTP yang valid');
+          setKtpFile(null);
+          setKtpPreview(null);
+          toast.error(result.errorMessage || 'Gambar bukan KTP yang valid. Silakan upload foto KTP.');
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -100,6 +160,12 @@ export function LoanForm({ open, onClose, category, onSubmit, isSubmitting }: Lo
   const removeKtpFile = () => {
     setKtpFile(null);
     setKtpPreview(null);
+    setKtpValidated(false);
+    setKtpError(null);
+    // Reset auto-filled fields
+    setBorrowerName('');
+    setBorrowerNik('');
+    setBorrowerAddress('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -297,15 +363,26 @@ export function LoanForm({ open, onClose, category, onSubmit, isSubmitting }: Lo
                 
                 {/* KTP Upload */}
                 <div className="space-y-2">
-                  <Label>Foto KTP</Label>
+                  <Label>Foto KTP {ktpValidated && <CheckCircle className="inline h-4 w-4 text-green-500 ml-1" />}</Label>
                   <input
                     type="file"
                     ref={fileInputRef}
                     accept="image/*"
                     onChange={handleKtpSelect}
                     className="hidden"
+                    disabled={processingOcr}
                   />
-                  {!ktpPreview ? (
+                  {processingOcr ? (
+                    <div className="border-2 border-dashed border-primary/50 rounded-lg p-6 text-center bg-primary/5">
+                      <Loader2 className="h-8 w-8 mx-auto mb-2 text-primary animate-spin" />
+                      <p className="text-sm text-muted-foreground">
+                        Memproses dan memvalidasi KTP...
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Mengekstrak NIK, Nama, dan Alamat
+                      </p>
+                    </div>
+                  ) : !ktpPreview ? (
                     <div
                       onClick={() => fileInputRef.current?.click()}
                       className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors"
@@ -315,25 +392,39 @@ export function LoanForm({ open, onClose, category, onSubmit, isSubmitting }: Lo
                         Klik untuk upload foto KTP
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Format: JPG, PNG, WEBP
+                        Data NIK, Nama, dan Alamat akan otomatis terisi
                       </p>
+                      {ktpError && (
+                        <div className="mt-2 flex items-center justify-center gap-1 text-destructive">
+                          <AlertCircle className="h-4 w-4" />
+                          <span className="text-xs">{ktpError}</span>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <div className="relative rounded-lg overflow-hidden border">
-                      <img
-                        src={ktpPreview}
-                        alt="Preview KTP"
-                        className="w-full h-48 object-cover"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2"
-                        onClick={removeKtpFile}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                    <div className="space-y-2">
+                      <div className="relative rounded-lg overflow-hidden border border-green-500">
+                        <img
+                          src={ktpPreview}
+                          alt="Preview KTP"
+                          className="w-full h-48 object-cover"
+                        />
+                        {ktpValidated && (
+                          <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3" />
+                            KTP Valid
+                          </div>
+                        )}
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2"
+                          onClick={removeKtpFile}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
