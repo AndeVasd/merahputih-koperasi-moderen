@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export interface Borrower {
+export interface BorrowerLoan {
   id: string;
   name: string;
   nik: string | null;
   phone: string | null;
   address: string | null;
-  totalLoans: number;
-  activeLoans: number;
+  category: string;
   totalAmount: number;
-  lastLoanDate: string;
+  status: string;
+  dueDate: string;
+  createdAt: string;
+  ktpImageUrl: string | null;
 }
 
 export function useBorrowers() {
-  const [borrowers, setBorrowers] = useState<Borrower[]>([]);
+  const [borrowerLoans, setBorrowerLoans] = useState<BorrowerLoan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,61 +33,22 @@ export function useBorrowers() {
 
       if (error) throw error;
 
-      // Group loans by borrower (using NIK as unique identifier, fallback to name)
-      const borrowerMap = new Map<string, {
-        name: string;
-        nik: string | null;
-        phone: string | null;
-        address: string | null;
-        loans: typeof loans;
-      }>();
+      // Transform to BorrowerLoan array - each loan is a separate entry
+      const borrowerLoanList: BorrowerLoan[] = (loans || []).map((loan) => ({
+        id: loan.id,
+        name: loan.borrower_name || '',
+        nik: loan.borrower_nik,
+        phone: loan.borrower_phone,
+        address: loan.borrower_address,
+        category: loan.category,
+        totalAmount: loan.total_amount || 0,
+        status: loan.status,
+        dueDate: loan.due_date,
+        createdAt: loan.created_at,
+        ktpImageUrl: loan.ktp_image_url,
+      }));
 
-      (loans || []).forEach((loan) => {
-        const key = loan.borrower_nik || loan.borrower_name || '';
-        if (!key) return;
-
-        if (borrowerMap.has(key)) {
-          borrowerMap.get(key)!.loans.push(loan);
-          // Update phone/address if not set
-          const existing = borrowerMap.get(key)!;
-          if (!existing.phone && loan.borrower_phone) {
-            existing.phone = loan.borrower_phone;
-          }
-          if (!existing.address && loan.borrower_address) {
-            existing.address = loan.borrower_address;
-          }
-        } else {
-          borrowerMap.set(key, {
-            name: loan.borrower_name || '',
-            nik: loan.borrower_nik,
-            phone: loan.borrower_phone,
-            address: loan.borrower_address,
-            loans: [loan],
-          });
-        }
-      });
-
-      // Transform to Borrower array
-      const borrowerList: Borrower[] = [];
-      borrowerMap.forEach((data, key) => {
-        const activeLoans = data.loans.filter(l => l.status === 'active').length;
-        const totalAmount = data.loans.reduce((sum, l) => sum + (l.total_amount || 0), 0);
-        const lastLoan = data.loans[0];
-
-        borrowerList.push({
-          id: key,
-          name: data.name,
-          nik: data.nik,
-          phone: data.phone,
-          address: data.address,
-          totalLoans: data.loans.length,
-          activeLoans,
-          totalAmount,
-          lastLoanDate: lastLoan?.created_at || '',
-        });
-      });
-
-      setBorrowers(borrowerList);
+      setBorrowerLoans(borrowerLoanList);
     } catch (err: any) {
       setError(err.message);
       console.error('Error fetching borrowers:', err);
@@ -114,8 +77,16 @@ export function useBorrowers() {
     };
   }, []);
 
+  // Calculate summary stats
+  const stats = {
+    totalBorrowers: new Set(borrowerLoans.map(l => l.nik || l.name)).size,
+    activeLoans: borrowerLoans.filter(l => l.status === 'active').length,
+    totalAmount: borrowerLoans.reduce((sum, l) => sum + l.totalAmount, 0),
+  };
+
   return {
-    borrowers,
+    borrowerLoans,
+    stats,
     loading,
     error,
     refetch: fetchBorrowers,
