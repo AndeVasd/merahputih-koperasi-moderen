@@ -8,12 +8,15 @@ import {
   Tractor, 
   Pill,
   FileText,
-  Settings
+  Settings,
+  Building2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import logoKopdes from '@/assets/logo-kopdes.jpg';
+import logoKopdes from '@/assets/logo-kopdes.png';
+
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+  { icon: Building2, label: 'Profil Koperasi', path: '/profil' },
   { icon: Users, label: 'Pengurus', path: '/pengurus' },
   { icon: UserCircle, label: 'Peminjam', path: '/peminjam' },
   { icon: Wallet, label: 'Pinjaman Uang', path: '/pinjaman/uang' },
@@ -30,16 +33,12 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-card no-print hidden lg:block">
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="flex h-20 items-center gap-3 border-b border-border px-6">
+        <div className="flex h-20 items-center gap-2 border-b border-border px-4">
           <img 
             src={logoKopdes} 
             alt="Logo Kopdes Merah Putih" 
-            className="h-12 w-auto object-contain"
+            className="h-16 w-auto object-contain"
           />
-          <div>
-            <h1 className="text-lg font-bold text-foreground">Kopdes</h1>
-            <p className="text-xs text-muted-foreground">Desa Mesuji Jaya</p>
-          </div>
         </div>
 
         {/* Navigation */}

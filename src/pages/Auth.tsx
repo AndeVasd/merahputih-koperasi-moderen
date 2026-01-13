@@ -7,8 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Building2, Lock, Mail, User } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import { z } from 'zod';
+import logoKopdes from '@/assets/logo-kopdes.png';
 
 const emailSchema = z.string().email('Email tidak valid');
 const passwordSchema = z.string().min(6, 'Password minimal 6 karakter');
@@ -118,15 +119,19 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
       <Card className="w-full max-w-md shadow-2xl border-primary/20">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-primary rounded-xl flex items-center justify-center shadow-lg">
-            <Building2 className="w-8 h-8 text-primary-foreground" />
+          <div className="mx-auto">
+            <img 
+              src={logoKopdes} 
+              alt="Logo Kopdes Merah Putih" 
+              className="h-24 w-auto object-contain mx-auto"
+            />
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-primary">
-              Koperasi Merah Putih
+              Kopdes Merah Putih
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              Sistem Manajemen Koperasi Desa
+              Sistem Manajemen Koperasi Desa Mesuji Jaya
             </CardDescription>
           </div>
         </CardHeader>

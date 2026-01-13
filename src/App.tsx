@@ -10,6 +10,7 @@ import Organization from "./pages/Organization";
 import Borrowers from "./pages/Borrowers";
 import LoanPage from "./pages/LoanPage";
 import Reports from "./pages/Reports";
+import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -47,6 +48,11 @@ const App = () => (
             <Route path="/laporan" element={
               <ProtectedRoute>
                 <Reports />
+              </ProtectedRoute>
+            } />
+            <Route path="/profil" element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
