@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
-import Members from "./pages/Members";
+import Organization from "./pages/Organization";
 import Borrowers from "./pages/Borrowers";
 import LoanPage from "./pages/LoanPage";
 import Reports from "./pages/Reports";
@@ -29,9 +29,9 @@ const App = () => (
                 <Index />
               </ProtectedRoute>
             } />
-            <Route path="/anggota" element={
+            <Route path="/pengurus" element={
               <ProtectedRoute>
-                <Members />
+                <Organization />
               </ProtectedRoute>
             } />
             <Route path="/peminjam" element={

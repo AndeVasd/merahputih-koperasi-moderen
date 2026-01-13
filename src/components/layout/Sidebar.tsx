@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-  { icon: Users, label: 'Anggota', path: '/anggota' },
+  { icon: Users, label: 'Pengurus', path: '/pengurus' },
   { icon: UserCircle, label: 'Peminjam', path: '/peminjam' },
   { icon: Wallet, label: 'Pinjaman Uang', path: '/pinjaman/uang' },
   { icon: ShoppingBasket, label: 'Sembako', path: '/pinjaman/sembako' },
