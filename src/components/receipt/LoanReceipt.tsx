@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 import { Loan, CATEGORY_LABELS } from '@/types/koperasi';
 import { Separator } from '@/components/ui/separator';
+import logoKopdes from '@/assets/logo-kopdes.png';
 
 interface LoanReceiptProps {
   loan: Loan;
@@ -31,14 +32,16 @@ export const LoanReceipt = forwardRef<HTMLDivElement, LoanReceiptProps>(
       <div ref={ref} className="bg-card p-8 rounded-xl max-w-md mx-auto print:max-w-full print:p-4">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
-              <span className="text-xl font-bold text-primary-foreground">K</span>
-            </div>
+          <div className="flex items-center justify-center mb-3">
+            <img 
+              src={logoKopdes} 
+              alt="Logo Kopdes Merah Putih" 
+              className="h-20 w-auto object-contain"
+            />
           </div>
-          <h1 className="text-xl font-bold text-foreground">KOPERASI DESA MERAH PUTIH</h1>
-          <p className="text-sm text-muted-foreground">Jl. Raya Desa No. 123, Kec. Maju Jaya</p>
-          <p className="text-sm text-muted-foreground">Telp: (021) 1234-5678</p>
+          <h1 className="text-xl font-bold text-foreground">KOPDES MERAH PUTIH</h1>
+          <p className="text-sm text-muted-foreground">Desa Mesuji Jaya, Kec. Mesuji</p>
+          <p className="text-sm text-muted-foreground">Telp: (0721) 123-456</p>
         </div>
 
         <Separator className="my-4" />
