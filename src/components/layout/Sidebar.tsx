@@ -11,7 +11,7 @@ import {
   Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
+import logoKopdes from '@/assets/logo-kopdes.jpg';
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
   { icon: Users, label: 'Pengurus', path: '/pengurus' },
@@ -31,12 +31,14 @@ export function Sidebar() {
       <div className="flex h-full flex-col">
         {/* Logo */}
         <div className="flex h-20 items-center gap-3 border-b border-border px-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
-            <span className="text-xl font-bold text-primary-foreground">K</span>
-          </div>
+          <img 
+            src={logoKopdes} 
+            alt="Logo Kopdes Merah Putih" 
+            className="h-12 w-auto object-contain"
+          />
           <div>
-            <h1 className="text-lg font-bold text-foreground">Koperasi</h1>
-            <p className="text-xs text-muted-foreground">Desa Merah Putih</p>
+            <h1 className="text-lg font-bold text-foreground">Kopdes</h1>
+            <p className="text-xs text-muted-foreground">Desa Mesuji Jaya</p>
           </div>
         </div>
 
