@@ -21,6 +21,8 @@ export interface Loan {
   id: string;
   memberId: string;
   memberName: string;
+  memberNik?: string;
+  memberPhone?: string;
   category: LoanCategory;
   items: LoanItem[];
   totalAmount: number;

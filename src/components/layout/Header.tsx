@@ -1,7 +1,12 @@
-import { Bell, Search, User, LogOut, Menu } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Bell, Search, User, LogOut, Menu, AlertTriangle, Clock, X, CreditCard, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useGlobalSearch, SearchResult } from '@/hooks/useGlobalSearch';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,6 +14,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 
 interface HeaderProps {
   title: string;
@@ -17,7 +29,13 @@ interface HeaderProps {
 }
 
 export function Header({ title, subtitle, onMenuClick }: HeaderProps) {
+  const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const { results: searchResults, loading: searchLoading } = useGlobalSearch(searchQuery);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const handleSignOut = async () => {
     await signOut();
@@ -25,6 +43,31 @@ export function Header({ title, subtitle, onMenuClick }: HeaderProps) {
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   const roleLabel = isAdmin ? 'Admin' : 'Pengguna';
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSearchResultClick = (result: SearchResult) => {
+    navigate(result.url);
+    setSearchQuery('');
+    setShowSearchResults(false);
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 lg:h-20 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-4 lg:px-8 no-print">
@@ -46,20 +89,154 @@ export function Header({ title, subtitle, onMenuClick }: HeaderProps) {
 
       <div className="flex items-center gap-2 lg:gap-4">
         {/* Search - hidden on mobile */}
-        <div className="relative hidden md:block">
+        <div className="relative hidden md:block" ref={searchRef}>
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Cari anggota, pinjaman..."
-            className="w-48 lg:w-64 pl-10"
+            placeholder="Cari nama, NIK, HP..."
+            className="w-48 lg:w-72 pl-10 pr-8"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowSearchResults(true);
+            }}
+            onFocus={() => setShowSearchResults(true)}
           />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+              onClick={() => {
+                setSearchQuery('');
+                setShowSearchResults(false);
+              }}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          )}
+          
+          {/* Search Results Dropdown */}
+          {showSearchResults && searchQuery.length >= 2 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-80 overflow-hidden">
+              <ScrollArea className="max-h-80">
+                {searchLoading ? (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    Mencari...
+                  </div>
+                ) : searchResults.length === 0 ? (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    Tidak ditemukan hasil untuk "{searchQuery}"
+                  </div>
+                ) : (
+                  <div className="py-2">
+                    {searchResults.map((result) => (
+                      <button
+                        key={`${result.type}-${result.id}`}
+                        className="w-full px-4 py-3 text-left hover:bg-muted transition-colors flex items-start gap-3"
+                        onClick={() => handleSearchResultClick(result)}
+                      >
+                        <div className={cn(
+                          "flex h-8 w-8 items-center justify-center rounded-full flex-shrink-0",
+                          result.type === 'loan' ? "bg-primary/10 text-primary" : "bg-secondary text-secondary-foreground"
+                        )}>
+                          {result.type === 'loan' ? <CreditCard className="h-4 w-4" /> : <Users className="h-4 w-4" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm truncate">{result.name}</span>
+                            {result.type === 'loan' && result.status && (
+                              <Badge 
+                                variant={result.status === 'active' ? 'default' : result.status === 'paid' ? 'secondary' : 'destructive'}
+                                className="text-xs"
+                              >
+                                {result.status === 'active' ? 'Aktif' : result.status === 'paid' ? 'Lunas' : 'Jatuh Tempo'}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                            {result.nik && <span>NIK: {result.nik}</span>}
+                            {result.phone && <span>• {result.phone}</span>}
+                          </div>
+                          {result.type === 'loan' && (
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                              <span>{result.categoryLabel}</span>
+                              {result.amount && <span>• {formatCurrency(result.amount)}</span>}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
+          )}
         </div>
 
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-            3
-          </span>
-        </Button>
+        {/* Notifications */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-0" align="end">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <h3 className="font-semibold">Notifikasi</h3>
+              {unreadCount > 0 && (
+                <Button variant="ghost" size="sm" className="text-xs h-auto py-1" onClick={markAllAsRead}>
+                  Tandai semua dibaca
+                </Button>
+              )}
+            </div>
+            <ScrollArea className="max-h-80">
+              {notifications.length === 0 ? (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                  Tidak ada notifikasi
+                </div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {notifications.map((notification) => (
+                    <button
+                      key={notification.id}
+                      className={cn(
+                        "w-full px-4 py-3 text-left hover:bg-muted transition-colors flex gap-3",
+                        !notification.read && "bg-primary/5"
+                      )}
+                      onClick={() => {
+                        markAsRead(notification.id);
+                        const urlCategory = notification.loanId ? '/pinjaman/uang' : '/';
+                        navigate(urlCategory);
+                      }}
+                    >
+                      <div className={cn(
+                        "flex h-8 w-8 items-center justify-center rounded-full flex-shrink-0",
+                        notification.type === 'overdue' ? "bg-destructive/10 text-destructive" : "bg-yellow-500/10 text-yellow-600"
+                      )}>
+                        {notification.type === 'overdue' ? (
+                          <AlertTriangle className="h-4 w-4" />
+                        ) : (
+                          <Clock className="h-4 w-4" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm">{notification.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                          {notification.message}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </PopoverContent>
+        </Popover>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
