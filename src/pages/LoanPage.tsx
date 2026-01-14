@@ -47,6 +47,8 @@ export default function LoanPage() {
     id: loan.id,
     memberId: loan.member_id || '',
     memberName: loan.members?.name || loan.borrower_name || 'Unknown',
+    memberNik: loan.borrower_nik || '',
+    memberPhone: loan.borrower_phone || '',
     category: loan.category as LoanCategory,
     items: (loan.loan_items || []).map((item) => ({
       id: item.id,
@@ -63,11 +65,17 @@ export default function LoanPage() {
     notes: loan.notes || undefined,
   }));
 
-  const filteredLoans = transformedLoans.filter(
-    (loan) =>
-      loan.memberName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      loan.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Enhanced search: by name, NIK, phone, and category
+  const filteredLoans = transformedLoans.filter((loan) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      loan.memberName.toLowerCase().includes(query) ||
+      loan.id.toLowerCase().includes(query) ||
+      (loan.memberNik && loan.memberNik.toLowerCase().includes(query)) ||
+      (loan.memberPhone && loan.memberPhone.toLowerCase().includes(query)) ||
+      loan.category.toLowerCase().includes(query)
+    );
+  });
 
   const handleAddLoan = async (data: LoanInput) => {
     setIsSubmitting(true);
@@ -123,7 +131,7 @@ export default function LoanPage() {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Cari pinjaman..."
+            placeholder="Cari nama, NIK, No. HP..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
