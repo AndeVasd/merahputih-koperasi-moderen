@@ -43,12 +43,17 @@ export function MobileSidebar({ open, onOpenChange }: MobileSidebarProps) {
         </SheetHeader>
         
         {/* Logo */}
-        <div className="flex h-20 items-center gap-2 border-b border-border px-4">
+        <div className="flex h-24 items-center gap-3 border-b border-border px-4">
           <img 
             src={logoKopdes} 
             alt="Logo Kopdes Merah Putih" 
-            className="h-16 w-auto object-contain"
+            className="h-16 w-16 object-contain flex-shrink-0"
           />
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-primary leading-tight">Koperasi Desa</span>
+            <span className="text-sm font-bold text-primary leading-tight">Merah Putih</span>
+            <span className="text-xs text-muted-foreground leading-tight">Desa Mesuji Jaya</span>
+          </div>
         </div>
 
         {/* Navigation */}
