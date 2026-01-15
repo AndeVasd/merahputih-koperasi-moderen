@@ -285,8 +285,8 @@ export function LoanForm({ open, onClose, category, onSubmit, isSubmitting }: Lo
       submitData.borrower_address = borrowerAddress || undefined;
     }
     
+    // Don't close here - let parent handle it after showing receipt
     await onSubmit(submitData);
-    onClose();
   };
 
   const getCategoryPlaceholders = () => {

@@ -94,7 +94,7 @@ export function useLoans(category?: string) {
     }
   };
 
-  const addLoan = async (loan: LoanInput) => {
+  const addLoan = async (loan: LoanInput): Promise<DbLoan> => {
     try {
       // First, insert the loan
       const { data: loanData, error: loanError } = await supabase
