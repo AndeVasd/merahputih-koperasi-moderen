@@ -8,7 +8,7 @@ import { LoanReceipt } from '@/components/receipt/LoanReceipt';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Download, Loader2 } from 'lucide-react';
-import { useLoans, LoanInput } from '@/hooks/useLoans';
+import { useLoans, LoanInput, DbLoan } from '@/hooks/useLoans';
 import { Loan, LoanCategory, CATEGORY_LABELS } from '@/types/koperasi';
 import { toast } from 'sonner';
 import { useReactToPrint } from 'react-to-print';
@@ -32,6 +32,7 @@ export default function LoanPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
+  const [selectedBorrowerPhone, setSelectedBorrowerPhone] = useState<string | undefined>();
   const [loanToPrint, setLoanToPrint] = useState<Loan | null>(null);
   
   const printRef = useRef<HTMLDivElement>(null);
@@ -65,6 +66,29 @@ export default function LoanPage() {
     notes: loan.notes || undefined,
   }));
 
+  // Transform DbLoan to Loan for receipt display
+  const transformDbLoanToLoan = (dbLoan: DbLoan): Loan => ({
+    id: dbLoan.id,
+    memberId: dbLoan.member_id || '',
+    memberName: dbLoan.members?.name || dbLoan.borrower_name || 'Unknown',
+    memberNik: dbLoan.borrower_nik || '',
+    memberPhone: dbLoan.borrower_phone || '',
+    category: dbLoan.category as LoanCategory,
+    items: (dbLoan.loan_items || []).map((item) => ({
+      id: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+      pricePerUnit: item.price,
+    })),
+    totalAmount: Number(dbLoan.total_amount),
+    interestRate: Number(dbLoan.interest_rate),
+    dueDate: dbLoan.due_date,
+    createdAt: dbLoan.created_at.split('T')[0],
+    status: dbLoan.status,
+    notes: dbLoan.notes || undefined,
+  });
+
   // Enhanced search: by name, NIK, phone, and category
   const filteredLoans = transformedLoans.filter((loan) => {
     const query = searchQuery.toLowerCase();
@@ -77,13 +101,21 @@ export default function LoanPage() {
     );
   });
 
-  const handleAddLoan = async (data: LoanInput) => {
+  const handleAddLoan = async (data: LoanInput & { borrower_phone?: string }) => {
     setIsSubmitting(true);
     try {
-      await addLoan({
+      const newDbLoan = await addLoan({
         ...data,
         category: dbCategory,
       });
+      
+      // Close form
+      setIsFormOpen(false);
+      
+      // Transform and show receipt modal
+      const newLoan = transformDbLoanToLoan(newDbLoan);
+      setSelectedLoan(newLoan);
+      setSelectedBorrowerPhone(data.borrower_phone || newDbLoan.borrower_phone || undefined);
     } finally {
       setIsSubmitting(false);
     }
@@ -94,6 +126,11 @@ export default function LoanPage() {
     setTimeout(() => {
       handlePrint();
     }, 100);
+  };
+
+  const handleViewReceipt = (loan: Loan) => {
+    setSelectedLoan(loan);
+    setSelectedBorrowerPhone(loan.memberPhone || undefined);
   };
 
   const handleExport = () => {
@@ -183,7 +220,7 @@ export default function LoanPage() {
       ) : (
         <LoanTable
           loans={filteredLoans}
-          onViewReceipt={(loan) => setSelectedLoan(loan)}
+          onViewReceipt={handleViewReceipt}
           onPrint={handlePrintLoan}
           onUpdateStatus={updateLoanStatus}
           onDelete={deleteLoan}
@@ -203,7 +240,11 @@ export default function LoanPage() {
       <ReceiptModal
         loan={selectedLoan}
         open={!!selectedLoan}
-        onClose={() => setSelectedLoan(null)}
+        onClose={() => {
+          setSelectedLoan(null);
+          setSelectedBorrowerPhone(undefined);
+        }}
+        borrowerPhone={selectedBorrowerPhone}
       />
 
       {/* Hidden Print Component */}
