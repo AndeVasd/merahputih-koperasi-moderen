@@ -46,32 +46,36 @@ export function ReceiptModal({ loan, open, onClose, borrowerPhone }: ReceiptModa
     const interest = loan.totalAmount * (loan.interestRate / 100);
     const grandTotal = loan.totalAmount + interest;
     
-    let message = `🧾 *STRUK PINJAMAN*\n`;
+    let message = `*STRUK PINJAMAN*\n`;
     message += `*KOPDES MERAH PUTIH*\n`;
     message += `Desa Mesuji Jaya\n`;
-    message += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+    message += `------------------------\n\n`;
     
-    message += `📋 *Detail Transaksi*\n`;
+    message += `*Detail Transaksi*\n`;
     message += `No. Transaksi: ${loan.id.slice(0, 8).toUpperCase()}\n`;
     message += `Tanggal: ${formatDate(loan.createdAt)}\n`;
     message += `Jatuh Tempo: ${formatDate(loan.dueDate)}\n`;
     message += `Kategori: ${CATEGORY_LABELS[loan.category]}\n\n`;
     
-    message += `👤 *Data Peminjam*\n`;
-    message += `Nama: ${loan.memberName}\n\n`;
+    message += `*Data Peminjam*\n`;
+    message += `Nama: ${loan.memberName}\n`;
+    if (loan.memberNik) message += `NIK: ${loan.memberNik}\n`;
+    if (loan.memberPhone) message += `No. HP: ${loan.memberPhone}\n`;
+    if (loan.memberAddress) message += `Alamat: ${loan.memberAddress}\n`;
+    message += `\n`;
     
-    message += `📦 *Rincian Pinjaman*\n`;
+    message += `*Rincian Pinjaman*\n`;
     loan.items.forEach((item, index) => {
       const subtotal = item.quantity * item.pricePerUnit;
       message += `${index + 1}. ${item.name}\n`;
       message += `   ${item.quantity} ${item.unit} x ${formatCurrency(item.pricePerUnit)} = ${formatCurrency(subtotal)}\n`;
     });
     
-    message += `\n━━━━━━━━━━━━━━━━━━━━\n`;
+    message += `\n------------------------\n`;
     message += `Subtotal: ${formatCurrency(loan.totalAmount)}\n`;
     message += `Bunga (${loan.interestRate}%): ${formatCurrency(interest)}\n`;
     message += `*TOTAL: ${formatCurrency(grandTotal)}*\n`;
-    message += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+    message += `------------------------\n\n`;
     
     message += `Terima kasih atas kepercayaan Anda.\n`;
     message += `Simpan pesan ini sebagai bukti pinjaman.`;
