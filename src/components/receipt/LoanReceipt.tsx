@@ -67,9 +67,44 @@ export const LoanReceipt = forwardRef<HTMLDivElement, LoanReceiptProps>(
 
         {/* Member Info */}
         <div className="mb-4">
-          <h3 className="font-semibold text-foreground mb-2">Data Peminjam</h3>
-          <p className="text-sm text-foreground">{loan.memberName}</p>
-          <p className="text-sm text-muted-foreground">ID: {loan.memberId}</p>
+          <h3 className="font-semibold text-foreground mb-3">Data Peminjam</h3>
+          
+          {/* KTP Photo */}
+          {loan.ktpImageUrl && (
+            <div className="mb-3">
+              <img 
+                src={loan.ktpImageUrl} 
+                alt="Foto KTP" 
+                className="w-full max-w-xs h-auto rounded-lg border border-border object-cover"
+              />
+            </div>
+          )}
+          
+          <div className="grid grid-cols-[100px_1fr] gap-y-1 text-sm">
+            <span className="text-muted-foreground">Nama:</span>
+            <span className="font-medium text-foreground">{loan.memberName}</span>
+            
+            {loan.memberNik && (
+              <>
+                <span className="text-muted-foreground">NIK:</span>
+                <span className="text-foreground">{loan.memberNik}</span>
+              </>
+            )}
+            
+            {loan.memberPhone && (
+              <>
+                <span className="text-muted-foreground">No. HP:</span>
+                <span className="text-foreground">{loan.memberPhone}</span>
+              </>
+            )}
+            
+            {loan.memberAddress && (
+              <>
+                <span className="text-muted-foreground">Alamat:</span>
+                <span className="text-foreground">{loan.memberAddress}</span>
+              </>
+            )}
+          </div>
         </div>
 
         <Separator className="my-4" />

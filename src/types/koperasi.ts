@@ -23,6 +23,8 @@ export interface Loan {
   memberName: string;
   memberNik?: string;
   memberPhone?: string;
+  memberAddress?: string;
+  ktpImageUrl?: string;
   category: LoanCategory;
   items: LoanItem[];
   totalAmount: number;

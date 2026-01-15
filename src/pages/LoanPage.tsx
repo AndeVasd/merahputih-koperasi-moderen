@@ -50,6 +50,8 @@ export default function LoanPage() {
     memberName: loan.members?.name || loan.borrower_name || 'Unknown',
     memberNik: loan.borrower_nik || '',
     memberPhone: loan.borrower_phone || '',
+    memberAddress: loan.borrower_address || '',
+    ktpImageUrl: loan.ktp_image_url || undefined,
     category: loan.category as LoanCategory,
     items: (loan.loan_items || []).map((item) => ({
       id: item.id,
@@ -73,6 +75,8 @@ export default function LoanPage() {
     memberName: dbLoan.members?.name || dbLoan.borrower_name || 'Unknown',
     memberNik: dbLoan.borrower_nik || '',
     memberPhone: dbLoan.borrower_phone || '',
+    memberAddress: dbLoan.borrower_address || '',
+    ktpImageUrl: dbLoan.ktp_image_url || undefined,
     category: dbLoan.category as LoanCategory,
     items: (dbLoan.loan_items || []).map((item) => ({
       id: item.id,
