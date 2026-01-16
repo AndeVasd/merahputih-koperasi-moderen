@@ -103,10 +103,6 @@ export function ReceiptModal({ loan, open, onClose, borrowerPhone }: ReceiptModa
         pixelRatio: 2,
       });
       
-      // Convert to blob
-      const response = await fetch(dataUrl);
-      const blob = await response.blob();
-      
       // Format phone number (remove leading 0, add country code if needed)
       let formattedPhone = phoneNumber.replace(/\D/g, '');
       if (formattedPhone.startsWith('0')) {
@@ -119,39 +115,17 @@ export function ReceiptModal({ loan, open, onClose, borrowerPhone }: ReceiptModa
       const message = generateWhatsAppMessage();
       const encodedMessage = encodeURIComponent(message);
       
-      // Check if Web Share API is available with files support
-      if (navigator.share && navigator.canShare) {
-        const file = new File([blob], `struk-${loan.id.slice(0, 8)}.png`, { type: 'image/png' });
-        
-        if (navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              title: 'Struk Pinjaman',
-              text: message,
-              files: [file],
-            });
-            toast.success('Struk berhasil dibagikan');
-            setIsSharing(false);
-            return;
-          } catch (shareError) {
-            // If share was cancelled or failed, fallback to WhatsApp URL
-            console.log('Share API failed, falling back to WhatsApp URL');
-          }
-        }
-      }
-      
-      // Fallback: Open WhatsApp with text message (image will need to be sent separately)
       // Download image first
       const downloadLink = document.createElement('a');
       downloadLink.href = dataUrl;
       downloadLink.download = `struk-${loan.id.slice(0, 8)}.png`;
       downloadLink.click();
       
-      // Then open WhatsApp with the message
+      // Directly open WhatsApp with the specific phone number
       const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
       window.open(whatsappUrl, '_blank');
       
-      toast.success('Gambar struk telah diunduh. Kirim gambar tersebut bersama dengan pesan WhatsApp.');
+      toast.success('Gambar struk telah diunduh. Lampirkan gambar saat mengirim pesan WhatsApp.');
     } catch (error) {
       console.error('Error sharing:', error);
       toast.error('Gagal membagikan struk');
