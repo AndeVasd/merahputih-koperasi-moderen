@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Organization from "./pages/Organization";
 import Borrowers from "./pages/Borrowers";
 import LoanPage from "./pages/LoanPage";
+import LoanHistory from "./pages/LoanHistory";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
@@ -43,6 +44,11 @@ const App = () => (
             <Route path="/pinjaman/:category" element={
               <ProtectedRoute>
                 <LoanPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/riwayat" element={
+              <ProtectedRoute>
+                <LoanHistory />
               </ProtectedRoute>
             } />
             <Route path="/laporan" element={

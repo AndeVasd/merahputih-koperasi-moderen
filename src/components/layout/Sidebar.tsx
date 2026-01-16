@@ -9,7 +9,8 @@ import {
   Pill,
   FileText,
   Settings,
-  Building2
+  Building2,
+  History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoKopdes from '@/assets/logo-kopdes.png';
@@ -23,6 +24,7 @@ const menuItems = [
   { icon: ShoppingBasket, label: 'Sembako', path: '/pinjaman/sembako' },
   { icon: Tractor, label: 'Alat Pertanian', path: '/pinjaman/alat-pertanian' },
   { icon: Pill, label: 'Obat-obatan', path: '/pinjaman/obat' },
+  { icon: History, label: 'Riwayat Pinjaman', path: '/riwayat' },
   { icon: FileText, label: 'Laporan', path: '/laporan' },
 ];
 
