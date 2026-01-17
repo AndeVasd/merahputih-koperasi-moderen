@@ -12,6 +12,7 @@ import LoanPage from "./pages/LoanPage";
 import LoanHistory from "./pages/LoanHistory";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -59,6 +60,11 @@ const App = () => (
             <Route path="/profil" element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/pengaturan" element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
