@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Loan, CATEGORY_LABELS } from '@/types/koperasi';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Printer, Share2, Loader2, MessageCircle } from 'lucide-react';
+import { Printer, Loader2, MessageCircle } from 'lucide-react';
 import { LoanReceipt } from './LoanReceipt';
 import { useReactToPrint } from 'react-to-print';
 import { toPng } from 'html-to-image';
@@ -85,16 +85,9 @@ export function ReceiptModal({ loan, open, onClose, borrowerPhone }: ReceiptModa
 
   const handleShareWhatsApp = async () => {
     if (!loan || !receiptRef.current) return;
-    
-    const phoneNumber = borrowerPhone || loan.memberPhone;
-    
-    if (!phoneNumber) {
-      toast.error('Nomor telepon tidak tersedia');
-      return;
-    }
-    
+
     setIsSharing(true);
-    
+
     try {
       // Generate image from receipt
       const dataUrl = await toPng(receiptRef.current, {
@@ -102,7 +95,40 @@ export function ReceiptModal({ loan, open, onClose, borrowerPhone }: ReceiptModa
         backgroundColor: '#ffffff',
         pixelRatio: 2,
       });
-      
+
+      const message = generateWhatsAppMessage();
+      const fileName = `struk-${loan.id.slice(0, 8)}.png`;
+
+      // Best effort (mobile): Use Web Share API so WhatsApp receives image + caption.
+      const navAny = navigator as unknown as {
+        share?: (data: { title?: string; text?: string; files?: File[] }) => Promise<void>;
+        canShare?: (data: { files?: File[] }) => boolean;
+      };
+
+      if (typeof navAny.share === 'function') {
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], fileName, { type: blob.type || 'image/png' });
+
+        if (typeof navAny.canShare !== 'function' || navAny.canShare({ files: [file] })) {
+          await navAny.share({
+            title: 'Struk Pinjaman',
+            text: message,
+            files: [file],
+          });
+
+          toast.success('Pilih WhatsApp lalu kirim ke nomor tujuan (gambar + pesan sudah ikut).');
+          return;
+        }
+      }
+
+      // Fallback (desktop/web): WhatsApp deep link can't attach images automatically.
+      const phoneNumber = borrowerPhone || loan.memberPhone;
+      if (!phoneNumber) {
+        toast.error('Nomor telepon tidak tersedia');
+        return;
+      }
+
       // Format phone number (remove leading 0, add country code if needed)
       let formattedPhone = phoneNumber.replace(/\D/g, '');
       if (formattedPhone.startsWith('0')) {
@@ -110,22 +136,18 @@ export function ReceiptModal({ loan, open, onClose, borrowerPhone }: ReceiptModa
       } else if (!formattedPhone.startsWith('62')) {
         formattedPhone = '62' + formattedPhone;
       }
-      
-      // Generate WhatsApp message
-      const message = generateWhatsAppMessage();
-      const encodedMessage = encodeURIComponent(message);
-      
-      // Download image first
+
+      // Download image first (user can attach manually)
       const downloadLink = document.createElement('a');
       downloadLink.href = dataUrl;
-      downloadLink.download = `struk-${loan.id.slice(0, 8)}.png`;
+      downloadLink.download = fileName;
       downloadLink.click();
-      
-      // Directly open WhatsApp with the specific phone number
+
+      const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
       window.open(whatsappUrl, '_blank');
-      
-      toast.success('Gambar struk telah diunduh. Lampirkan gambar saat mengirim pesan WhatsApp.');
+
+      toast.success('Gambar struk diunduh. Lampirkan gambar saat mengirim pesan WhatsApp.');
     } catch (error) {
       console.error('Error sharing:', error);
       toast.error('Gagal membagikan struk');
