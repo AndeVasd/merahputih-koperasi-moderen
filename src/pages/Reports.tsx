@@ -9,6 +9,7 @@ import { CATEGORY_LABELS, LoanCategory } from '@/types/koperasi';
 import { useReactToPrint } from 'react-to-print';
 import { useLoans } from '@/hooks/useLoans';
 import { Skeleton } from '@/components/ui/skeleton';
+import logoKopdes from '@/assets/logo-kopdes.png';
 
 export default function Reports() {
   const [reportType, setReportType] = useState<string>('all');
@@ -147,12 +148,10 @@ export default function Reports() {
         {/* Header */}
         <div className="text-center mb-8 print:mb-4">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="h-12 w-12 rounded-xl gradient-primary flex items-center justify-center">
-              <span className="text-2xl font-bold text-primary-foreground">K</span>
-            </div>
+            <img src={logoKopdes} alt="Logo Koperasi" className="h-16 w-16 object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">KOPERASI DESA MERAH PUTIH</h1>
-          <p className="text-muted-foreground">Jl. Raya Desa No. 123, Kec. Maju Jaya</p>
+          <p className="text-muted-foreground">Desa Mesuji Jaya</p>
           <div className="mt-4 py-2 border-y border-border">
             <h2 className="text-lg font-semibold">LAPORAN PINJAMAN</h2>
             <p className="text-sm text-muted-foreground">
@@ -161,8 +160,8 @@ export default function Reports() {
           </div>
         </div>
 
-        {/* Summary Stats */}
-        <div className="grid gap-4 md:grid-cols-4 mb-8">
+        {/* Summary Stats - Hidden when printing */}
+        <div className="grid gap-4 md:grid-cols-4 mb-8 print:hidden">
           <div className="p-4 rounded-lg bg-secondary">
             <p className="text-sm text-muted-foreground">Total Pinjaman</p>
             <p className="text-xl font-bold text-foreground">{formatCurrency(totalAmount)}</p>
