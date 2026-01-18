@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,24 +6,71 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Building2, Bell, Shield, Palette } from 'lucide-react';
 import logoKopdes from '@/assets/logo-kopdes.png';
+import { useKoperasiSettings } from '@/hooks/useKoperasiSettings';
 
 export default function Settings() {
-  const [kopiName, setKopiName] = useState('Koperasi Desa Merah Putih');
-  const [kopiAddress, setKopiAddress] = useState('Desa Mesuji Jaya');
-  const [defaultInterestRate, setDefaultInterestRate] = useState('10');
+  const { settings, isLoading, updateSettings, isUpdating } = useKoperasiSettings();
+
+  const [kopiName, setKopiName] = useState('');
+  const [kopiAddress, setKopiAddress] = useState('');
+  const [kopiPhone, setKopiPhone] = useState('');
+  const [kopiEmail, setKopiEmail] = useState('');
+  const [defaultInterestRate, setDefaultInterestRate] = useState('');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [dueDateReminder, setDueDateReminder] = useState(true);
 
+  // Sync local state with fetched settings
+  useEffect(() => {
+    if (settings) {
+      setKopiName(settings.name);
+      setKopiAddress(settings.address);
+      setKopiPhone(settings.phone || '');
+      setKopiEmail(settings.email || '');
+      setDefaultInterestRate(String(settings.default_interest_rate));
+      setNotificationsEnabled(settings.notifications_enabled);
+      setDueDateReminder(settings.due_date_reminder);
+    }
+  }, [settings]);
+
   const handleSaveGeneral = () => {
-    toast.success('Pengaturan umum berhasil disimpan');
+    updateSettings({
+      name: kopiName,
+      address: kopiAddress,
+      phone: kopiPhone || null,
+      email: kopiEmail || null,
+      default_interest_rate: parseFloat(defaultInterestRate) || 10,
+    });
   };
 
   const handleSaveNotifications = () => {
-    toast.success('Pengaturan notifikasi berhasil disimpan');
+    updateSettings({
+      notifications_enabled: notificationsEnabled,
+      due_date_reminder: dueDateReminder,
+    });
   };
+
+  if (isLoading) {
+    return (
+      <MainLayout title="Pengaturan" subtitle="Kelola pengaturan aplikasi koperasi">
+        <div className="space-y-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-4 w-64" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-32 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout title="Pengaturan" subtitle="Kelola pengaturan aplikasi koperasi">
@@ -70,6 +117,25 @@ export default function Settings() {
                 />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="kopiPhone">Telepon</Label>
+                <Input
+                  id="kopiPhone"
+                  value={kopiPhone}
+                  onChange={(e) => setKopiPhone(e.target.value)}
+                  placeholder="Nomor telepon koperasi"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="kopiEmail">Email</Label>
+                <Input
+                  id="kopiEmail"
+                  type="email"
+                  value={kopiEmail}
+                  onChange={(e) => setKopiEmail(e.target.value)}
+                  placeholder="Email koperasi"
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="interestRate">Suku Bunga Default (%)</Label>
                 <Input
                   id="interestRate"
@@ -81,8 +147,8 @@ export default function Settings() {
               </div>
             </div>
             <div className="flex justify-end pt-4">
-              <Button onClick={handleSaveGeneral} className="gradient-primary">
-                Simpan Perubahan
+              <Button onClick={handleSaveGeneral} className="gradient-primary" disabled={isUpdating}>
+                {isUpdating ? 'Menyimpan...' : 'Simpan Perubahan'}
               </Button>
             </div>
           </CardContent>
@@ -124,8 +190,8 @@ export default function Settings() {
               />
             </div>
             <div className="flex justify-end pt-4">
-              <Button onClick={handleSaveNotifications} className="gradient-primary">
-                Simpan Perubahan
+              <Button onClick={handleSaveNotifications} className="gradient-primary" disabled={isUpdating}>
+                {isUpdating ? 'Menyimpan...' : 'Simpan Perubahan'}
               </Button>
             </div>
           </CardContent>

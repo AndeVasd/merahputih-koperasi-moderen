@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { Loan, CATEGORY_LABELS } from '@/types/koperasi';
 import { Separator } from '@/components/ui/separator';
 import logoKopdes from '@/assets/logo-kopdes.png';
+import { useKoperasiSettings } from '@/hooks/useKoperasiSettings';
 
 interface LoanReceiptProps {
   loan: Loan;
@@ -9,6 +10,8 @@ interface LoanReceiptProps {
 
 export const LoanReceipt = forwardRef<HTMLDivElement, LoanReceiptProps>(
   ({ loan }, ref) => {
+    const { settings } = useKoperasiSettings();
+
     const formatCurrency = (value: number) => {
       return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -28,6 +31,10 @@ export const LoanReceipt = forwardRef<HTMLDivElement, LoanReceiptProps>(
     const interest = loan.totalAmount * (loan.interestRate / 100);
     const grandTotal = loan.totalAmount + interest;
 
+    const kopiName = settings?.name || 'KOPDES MERAH PUTIH';
+    const kopiAddress = settings?.address || 'Desa Mesuji Jaya';
+    const kopiPhone = settings?.phone || '(0721) 123-456';
+
     return (
       <div ref={ref} className="bg-card p-8 rounded-xl max-w-md mx-auto print:max-w-full print:p-4">
         {/* Header */}
@@ -35,13 +42,13 @@ export const LoanReceipt = forwardRef<HTMLDivElement, LoanReceiptProps>(
           <div className="flex items-center justify-center mb-3">
             <img 
               src={logoKopdes} 
-              alt="Logo Kopdes Merah Putih" 
+              alt={`Logo ${kopiName}`}
               className="h-20 w-auto object-contain"
             />
           </div>
-          <h1 className="text-xl font-bold text-foreground">KOPDES MERAH PUTIH</h1>
-          <p className="text-sm text-muted-foreground">Desa Mesuji Jaya, Kec. Mesuji</p>
-          <p className="text-sm text-muted-foreground">Telp: (0721) 123-456</p>
+          <h1 className="text-xl font-bold text-foreground">{kopiName.toUpperCase()}</h1>
+          <p className="text-sm text-muted-foreground">{kopiAddress}</p>
+          {kopiPhone && <p className="text-sm text-muted-foreground">Telp: {kopiPhone}</p>}
         </div>
 
         <Separator className="my-4" />

@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      koperasi_settings: {
+        Row: {
+          address: string
+          created_at: string
+          default_interest_rate: number
+          due_date_reminder: boolean
+          email: string | null
+          id: string
+          name: string
+          notifications_enabled: boolean
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          created_at?: string
+          default_interest_rate?: number
+          due_date_reminder?: boolean
+          email?: string | null
+          id?: string
+          name?: string
+          notifications_enabled?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          default_interest_rate?: number
+          due_date_reminder?: boolean
+          email?: string | null
+          id?: string
+          name?: string
+          notifications_enabled?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       loan_items: {
         Row: {
           created_at: string

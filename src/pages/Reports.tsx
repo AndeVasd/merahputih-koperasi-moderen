@@ -8,6 +8,7 @@ import { Download, Printer } from 'lucide-react';
 import { CATEGORY_LABELS, LoanCategory } from '@/types/koperasi';
 import { useReactToPrint } from 'react-to-print';
 import { useLoans } from '@/hooks/useLoans';
+import { useKoperasiSettings } from '@/hooks/useKoperasiSettings';
 import { Skeleton } from '@/components/ui/skeleton';
 import logoKopdes from '@/assets/logo-kopdes.png';
 
@@ -18,10 +19,14 @@ export default function Reports() {
   const reportRef = useRef<HTMLDivElement>(null);
 
   const { loans, loading } = useLoans();
+  const { settings } = useKoperasiSettings();
+
+  const kopiName = settings?.name || 'Koperasi Desa Merah Putih';
+  const kopiAddress = settings?.address || 'Desa Mesuji Jaya';
 
   const handlePrint = useReactToPrint({
     contentRef: reportRef,
-    documentTitle: `Laporan-Koperasi-${new Date().toISOString().split('T')[0]}`,
+    documentTitle: `Laporan-${kopiName.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}`,
   });
 
   const formatCurrency = (value: number) => {
@@ -49,7 +54,7 @@ export default function Reports() {
 
   const handleExportCSV = () => {
     const csv = [
-      ['Laporan Koperasi Desa Merah Putih'],
+      [`Laporan ${kopiName}`],
       ['Periode:', dateFrom || 'Awal', '-', dateTo || 'Sekarang'],
       [''],
       ['No', 'ID', 'Anggota', 'Kategori', 'Total', 'Status', 'Tanggal'],
@@ -72,7 +77,7 @@ export default function Reports() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `laporan-koperasi-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `laporan-${kopiName.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
   };
 
@@ -150,8 +155,8 @@ export default function Reports() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <img src={logoKopdes} alt="Logo Koperasi" className="h-16 w-16 object-contain" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">KOPERASI DESA MERAH PUTIH</h1>
-          <p className="text-muted-foreground">Desa Mesuji Jaya</p>
+          <h1 className="text-2xl font-bold text-foreground">{kopiName.toUpperCase()}</h1>
+          <p className="text-muted-foreground">{kopiAddress}</p>
           <div className="mt-4 py-2 border-y border-border">
             <h2 className="text-lg font-semibold">LAPORAN PINJAMAN</h2>
             <p className="text-sm text-muted-foreground">
@@ -240,7 +245,7 @@ export default function Reports() {
         {/* Footer */}
         <div className="mt-8 pt-4 border-t border-border text-center text-sm text-muted-foreground print:mt-4">
           <p>Dicetak pada: {new Date().toLocaleString('id-ID')}</p>
-          <p className="mt-1">Koperasi Desa Merah Putih © {new Date().getFullYear()}</p>
+          <p className="mt-1">{kopiName} © {new Date().getFullYear()}</p>
         </div>
       </div>
     </MainLayout>
