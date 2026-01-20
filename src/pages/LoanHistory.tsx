@@ -12,28 +12,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { Search, Download, Loader2, Trash2, Eye, Printer, RotateCcw } from 'lucide-react';
+import { Search, Download, Loader2, Eye, Printer, RotateCcw } from 'lucide-react';
 import { useLoanHistory } from '@/hooks/useLoanHistory';
 import { Loan, LoanCategory, CATEGORY_LABELS } from '@/types/koperasi';
 import { toast } from 'sonner';
 import { useReactToPrint } from 'react-to-print';
 
 export default function LoanHistory() {
-  const { loans, loading, deleteLoan, restoreLoan } = useLoanHistory();
+  const { loans, loading, restoreLoan } = useLoanHistory();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
-  const [loanToDelete, setLoanToDelete] = useState<string | null>(null);
   const [loanToPrint, setLoanToPrint] = useState<Loan | null>(null);
   
   const printRef = useRef<HTMLDivElement>(null);
@@ -95,13 +84,6 @@ export default function LoanHistory() {
       month: 'short',
       year: 'numeric',
     });
-  };
-
-  const handleDelete = async () => {
-    if (loanToDelete) {
-      await deleteLoan(loanToDelete);
-      setLoanToDelete(null);
-    }
   };
 
   const handleRestore = async (id: string) => {
@@ -247,14 +229,6 @@ export default function LoanHistory() {
                       >
                         <RotateCcw className="h-4 w-4 text-blue-500" />
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => setLoanToDelete(loan.id)}
-                        title="Hapus"
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -263,24 +237,6 @@ export default function LoanHistory() {
           </Table>
         </div>
       )}
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!loanToDelete} onOpenChange={() => setLoanToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Hapus Riwayat Pinjaman?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Data pinjaman ini akan dihapus secara permanen dan tidak dapat dikembalikan.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
-              Hapus
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {/* Receipt Modal */}
       <ReceiptModal
