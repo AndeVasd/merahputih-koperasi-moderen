@@ -69,6 +69,7 @@ export function useLoans(category?: string) {
           members (id, name),
           loan_items (*)
         `)
+        .neq('status', 'paid') // Exclude paid loans - they go to history
         .order('created_at', { ascending: false });
 
       if (category) {
