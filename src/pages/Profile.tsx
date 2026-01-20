@@ -1,14 +1,38 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { MapPin, Phone, Mail, Calendar, Target, Eye, Users, Building2 } from 'lucide-react';
 import logoKopdes from '@/assets/logo-kopdes.png';
+import { useKoperasiSettings } from '@/hooks/useKoperasiSettings';
 
 const Profile = () => {
+  const { settings, isLoading } = useKoperasiSettings();
+
+  if (isLoading) {
+    return (
+      <MainLayout title="Profil Koperasi" subtitle="Memuat informasi...">
+        <div className="space-y-6">
+          <Card className="overflow-hidden">
+            <div className="p-8">
+              <Skeleton className="h-32 w-32 rounded-2xl" />
+              <Skeleton className="h-8 w-64 mt-4" />
+              <Skeleton className="h-4 w-48 mt-2" />
+            </div>
+          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Skeleton className="h-64" />
+            <Skeleton className="h-64" />
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout 
       title="Profil Koperasi" 
-      subtitle="Informasi lengkap tentang Kopdes Merah Putih"
+      subtitle={`Informasi lengkap tentang ${settings?.name || 'Koperasi'}`}
     >
       <div className="space-y-6">
         {/* Header Section */}
@@ -18,16 +42,16 @@ const Profile = () => {
               <div className="bg-white rounded-2xl p-4 shadow-lg">
                 <img 
                   src={logoKopdes} 
-                  alt="Logo Kopdes Merah Putih" 
+                  alt={`Logo ${settings?.name || 'Koperasi'}`} 
                   className="h-32 w-auto object-contain"
                 />
               </div>
               <div className="text-center md:text-left">
                 <h1 className="text-3xl font-bold text-foreground mb-2">
-                  KOPDES MERAH PUTIH
+                  {settings?.name || 'KOPDES MERAH PUTIH'}
                 </h1>
                 <p className="text-lg text-muted-foreground mb-4">
-                  Koperasi Desa Mesuji Jaya
+                  {settings?.address || 'Koperasi Desa'}
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                   <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
@@ -57,8 +81,7 @@ const Profile = () => {
                 <div>
                   <p className="font-medium text-foreground">Alamat</p>
                   <p className="text-muted-foreground">
-                    Desa Mesuji Jaya, Kecamatan Mesuji<br />
-                    Kabupaten Mesuji, Lampung 34699
+                    {settings?.address || 'Alamat belum diatur'}
                   </p>
                 </div>
               </div>
@@ -67,7 +90,9 @@ const Profile = () => {
                 <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="font-medium text-foreground">Telepon</p>
-                  <p className="text-muted-foreground">(0721) 123-456</p>
+                  <p className="text-muted-foreground">
+                    {settings?.phone || 'Telepon belum diatur'}
+                  </p>
                 </div>
               </div>
               <Separator />
@@ -75,7 +100,9 @@ const Profile = () => {
                 <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="font-medium text-foreground">Email</p>
-                  <p className="text-muted-foreground">kopdes.merahputih@gmail.com</p>
+                  <p className="text-muted-foreground">
+                    {settings?.email || 'Email belum diatur'}
+                  </p>
                 </div>
               </div>
               <Separator />
@@ -105,7 +132,7 @@ const Profile = () => {
                 </div>
                 <p className="text-muted-foreground pl-6">
                   Menjadi koperasi desa yang mandiri, transparan, dan berkontribusi nyata 
-                  dalam meningkatkan kesejahteraan masyarakat Desa Mesuji Jaya.
+                  dalam meningkatkan kesejahteraan masyarakat.
                 </p>
               </div>
               <Separator />
