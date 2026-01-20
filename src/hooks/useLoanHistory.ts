@@ -55,8 +55,11 @@ export function useLoanHistory() {
 
       if (error) throw error;
       
+      // Refetch to update the list
+      await fetchLoans();
       toast.success('Riwayat pinjaman berhasil dihapus');
     } catch (err: any) {
+      console.error('Error deleting loan:', err);
       toast.error('Gagal menghapus riwayat: ' + err.message);
       throw err;
     }
@@ -71,8 +74,11 @@ export function useLoanHistory() {
 
       if (error) throw error;
       
+      // Refetch to update the list
+      await fetchLoans();
       toast.success('Pinjaman dikembalikan ke status aktif');
     } catch (err: any) {
+      console.error('Error restoring loan:', err);
       toast.error('Gagal mengembalikan pinjaman: ' + err.message);
       throw err;
     }
