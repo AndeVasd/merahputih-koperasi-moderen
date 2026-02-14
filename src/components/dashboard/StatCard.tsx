@@ -69,7 +69,11 @@ export function StatCard({ title, value, subtitle, icon: Icon, trend, variant = 
           <p className={cn('text-xs font-semibold uppercase tracking-wider', styles.title)}>
             {title}
           </p>
-          <p className={cn('text-2xl font-extrabold tracking-tight', styles.value)}>
+          <p className={cn(
+            'font-extrabold tracking-tight break-words',
+            typeof value === 'string' && value.length > 12 ? 'text-base lg:text-xl' : 'text-2xl',
+            styles.value
+          )}>
             {value}
           </p>
           {subtitle && (
