@@ -255,11 +255,7 @@ export function Header({ title, subtitle, onMenuClick }: HeaderProps) {
               <p className="text-sm font-medium">{displayName}</p>
               <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate('/akun')} className="cursor-pointer">
-              <User className="mr-2 h-4 w-4" />
-              Akun Saya
-            </DropdownMenuItem>
+            
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
               <LogOut className="mr-2 h-4 w-4" />
