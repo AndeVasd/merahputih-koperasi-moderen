@@ -13,67 +13,86 @@ interface StatCardProps {
   variant?: 'default' | 'primary' | 'accent' | 'success' | 'warning';
 }
 
-const variants = {
-  default: 'bg-card',
-  primary: 'gradient-primary text-primary-foreground',
-  accent: 'gradient-accent text-accent-foreground',
-  success: 'bg-success text-success-foreground',
-  warning: 'bg-warning text-warning-foreground',
+const variantStyles = {
+  default: {
+    card: 'bg-card border border-border',
+    icon: 'bg-primary/10 text-primary',
+    title: 'text-muted-foreground',
+    value: 'text-foreground',
+    subtitle: 'text-muted-foreground',
+  },
+  primary: {
+    card: 'bg-gradient-to-br from-primary to-primary/80 border-none shadow-lg shadow-primary/20',
+    icon: 'bg-white/20 text-white',
+    title: 'text-white/80',
+    value: 'text-white',
+    subtitle: 'text-white/60',
+  },
+  accent: {
+    card: 'bg-gradient-to-br from-accent to-accent/80 border-none shadow-lg shadow-accent/20',
+    icon: 'bg-white/20 text-white',
+    title: 'text-white/80',
+    value: 'text-white',
+    subtitle: 'text-white/60',
+  },
+  success: {
+    card: 'bg-gradient-to-br from-success to-success/80 border-none shadow-lg shadow-success/20',
+    icon: 'bg-white/20 text-white',
+    title: 'text-white/80',
+    value: 'text-white',
+    subtitle: 'text-white/60',
+  },
+  warning: {
+    card: 'bg-gradient-to-br from-warning to-warning/80 border-none shadow-lg shadow-warning/20',
+    icon: 'bg-white/20 text-white',
+    title: 'text-white/80',
+    value: 'text-white',
+    subtitle: 'text-white/60',
+  },
 };
 
 export function StatCard({ title, value, subtitle, icon: Icon, trend, variant = 'default' }: StatCardProps) {
-  const isColored = variant !== 'default';
+  const styles = variantStyles[variant];
 
   return (
     <div className={cn(
-      'rounded-xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg animate-fade-in',
-      variants[variant]
+      'relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 animate-fade-in',
+      styles.card
     )}>
-      <div className="flex items-start justify-between">
-        <div>
-          <p className={cn(
-            'text-sm font-medium',
-            isColored ? 'text-current opacity-80' : 'text-muted-foreground'
-          )}>
+      {/* Decorative circle */}
+      {variant !== 'default' && (
+        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10" />
+      )}
+      
+      <div className="relative flex items-start justify-between">
+        <div className="space-y-2">
+          <p className={cn('text-xs font-semibold uppercase tracking-wider', styles.title)}>
             {title}
           </p>
-          <p className={cn(
-            'mt-2 text-3xl font-bold',
-            isColored ? 'text-current' : 'text-foreground'
-          )}>
+          <p className={cn('text-2xl font-extrabold tracking-tight', styles.value)}>
             {value}
           </p>
           {subtitle && (
-            <p className={cn(
-              'mt-1 text-sm',
-              isColored ? 'text-current opacity-70' : 'text-muted-foreground'
-            )}>
+            <p className={cn('text-xs font-medium', styles.subtitle)}>
               {subtitle}
             </p>
           )}
           {trend && (
             <div className={cn(
-              'mt-2 flex items-center text-sm',
-              trend.isPositive ? 'text-success' : 'text-destructive'
+              'inline-flex items-center gap-1 text-xs font-semibold rounded-full px-2 py-0.5',
+              trend.isPositive 
+                ? 'bg-success/20 text-success' 
+                : 'bg-destructive/20 text-destructive'
             )}>
               <span>{trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%</span>
-              <span className={cn(
-                'ml-1',
-                isColored ? 'text-current opacity-60' : 'text-muted-foreground'
-              )}>
-                vs bulan lalu
-              </span>
             </div>
           )}
         </div>
         <div className={cn(
-          'flex h-12 w-12 items-center justify-center rounded-xl',
-          isColored ? 'bg-white/20' : 'bg-primary/10'
+          'flex h-11 w-11 items-center justify-center rounded-xl',
+          styles.icon
         )}>
-          <Icon className={cn(
-            'h-6 w-6',
-            isColored ? 'text-current' : 'text-primary'
-          )} />
+          <Icon className="h-5 w-5" />
         </div>
       </div>
     </div>

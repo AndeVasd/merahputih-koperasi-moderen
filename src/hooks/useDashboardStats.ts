@@ -73,10 +73,14 @@ export function useDashboardStats() {
       return acc;
     }, {} as Record<typeof categories[number], number>);
 
+    const activeLoanAmount = loans
+      .filter((l) => l.status !== 'paid')
+      .reduce((sum, l) => sum + l.total_amount, 0);
+
     return {
       totalMembers: members.length,
-      totalLoans: loans.length,
-      totalLoanAmount: loans.reduce((sum, l) => sum + l.total_amount, 0),
+      totalLoans: loans.filter((l) => l.status !== 'paid').length,
+      totalLoanAmount: activeLoanAmount,
       activeLoans: activeLoans.length,
       overdueLoans: overdueLoans.length,
       paidLoans: paidLoans.length,
