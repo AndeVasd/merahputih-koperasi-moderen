@@ -9,10 +9,12 @@ import { Users, Wallet, AlertTriangle, TrendingUp, CheckCircle } from 'lucide-re
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { Loan, LoanCategory } from '@/types/koperasi';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useKoperasiSettings } from '@/hooks/useKoperasiSettings';
 
 export default function Dashboard() {
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const { stats, loans, loading } = useDashboardStats();
+  const { settings } = useKoperasiSettings();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -50,16 +52,16 @@ export default function Dashboard() {
     return (
       <MainLayout
         title="Dashboard"
-        subtitle="Selamat datang di Sistem Koperasi Desa Merah Putih"
+        subtitle={`Selamat datang di Sistem ${settings?.name || 'Koperasi'}`}
       >
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-32 rounded-xl" />
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-5 mb-8">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-2xl" />
           ))}
         </div>
         <div className="grid gap-6 lg:grid-cols-2 mb-8">
-          <Skeleton className="h-[380px] rounded-xl" />
-          <Skeleton className="h-[380px] rounded-xl" />
+          <Skeleton className="h-[380px] rounded-2xl" />
+          <Skeleton className="h-[380px] rounded-2xl" />
         </div>
       </MainLayout>
     );
@@ -68,10 +70,10 @@ export default function Dashboard() {
   return (
     <MainLayout
       title="Dashboard"
-      subtitle="Selamat datang di Sistem Koperasi Desa Merah Putih"
+      subtitle={`Selamat datang di Sistem ${settings?.name || 'Koperasi'}`}
     >
       {/* Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mb-8">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5 mb-8">
         <StatCard
           title="Total Anggota"
           value={stats.totalMembers}
@@ -82,7 +84,7 @@ export default function Dashboard() {
         <StatCard
           title="Total Pinjaman"
           value={formatCurrency(stats.totalLoanAmount)}
-          subtitle={`${stats.totalLoans} transaksi`}
+          subtitle={`${stats.totalLoans} transaksi aktif`}
           icon={Wallet}
           variant="default"
         />
@@ -111,14 +113,14 @@ export default function Dashboard() {
 
       {/* Charts */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Statistik Pinjaman</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">📊 Statistik Pinjaman</h2>
         <LoanChart loans={loans} />
       </div>
 
       {/* Category Cards */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Kategori Pinjaman</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <h2 className="text-lg font-semibold text-foreground mb-4">📂 Kategori Pinjaman</h2>
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           {categories.map((category) => (
             <CategoryCard
               key={category}
@@ -131,10 +133,13 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Loans */}
-      <RecentLoans
-        loans={transformedLoans}
-        onViewReceipt={(loan) => setSelectedLoan(loan)}
-      />
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-foreground mb-4">🕐 Pinjaman Terbaru</h2>
+        <RecentLoans
+          loans={transformedLoans}
+          onViewReceipt={(loan) => setSelectedLoan(loan)}
+        />
+      </div>
 
       {/* Receipt Modal */}
       <ReceiptModal
