@@ -38,19 +38,19 @@ const Profile = () => {
         {/* Header Section */}
         <Card className="overflow-hidden">
           <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-8">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="bg-white rounded-2xl p-4 shadow-lg">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="bg-white rounded-2xl p-5 shadow-lg flex-shrink-0">
                 <img 
                   src={logoKopdes} 
                   alt={`Logo ${settings?.name || 'Koperasi'}`} 
-                  className="h-32 w-auto object-contain"
+                  className="h-40 w-40 object-contain"
                 />
               </div>
               <div className="text-center md:text-left">
-                <h1 className="text-3xl font-bold text-foreground mb-2">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">
                   {settings?.name || 'KOPDES MERAH PUTIH'}
                 </h1>
-                <p className="text-lg text-muted-foreground mb-4">
+                <p className="text-sm text-muted-foreground mb-4 max-w-md leading-relaxed">
                   {settings?.address || 'Koperasi Desa'}
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center md:justify-start">
