@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoKopdes from '@/assets/logo-kopdes.png';
+import { useKoperasiSettings } from '@/hooks/useKoperasiSettings';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
@@ -30,6 +31,13 @@ const menuItems = [
 
 export function Sidebar() {
   const location = useLocation();
+  const { settings } = useKoperasiSettings();
+
+  const kopiName = settings?.name || 'Koperasi Desa Merah Putih';
+  // Split name for display
+  const nameParts = kopiName.split(' ');
+  const line1 = nameParts.slice(0, Math.ceil(nameParts.length / 2)).join(' ');
+  const line2 = nameParts.slice(Math.ceil(nameParts.length / 2)).join(' ');
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-card no-print hidden lg:block">
@@ -38,18 +46,20 @@ export function Sidebar() {
         <div className="flex h-24 items-center gap-3 border-b border-border px-4">
           <img 
             src={logoKopdes} 
-            alt="Logo Kopdes Merah Putih" 
+            alt={`Logo ${kopiName}`}
             className="h-16 w-16 object-contain flex-shrink-0"
           />
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-primary leading-tight">Koperasi Desa</span>
-            <span className="text-sm font-bold text-primary leading-tight">Merah Putih</span>
-            <span className="text-xs text-muted-foreground leading-tight">Desa Mesuji Jaya</span>
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm font-bold text-primary leading-tight truncate">{line1}</span>
+            {line2 && <span className="text-sm font-bold text-primary leading-tight truncate">{line2}</span>}
+            <span className="text-xs text-muted-foreground leading-tight truncate">
+              {settings?.address || 'Koperasi Desa'}
+            </span>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-4">
+        <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (

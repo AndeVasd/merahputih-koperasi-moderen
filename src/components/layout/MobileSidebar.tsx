@@ -15,6 +15,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import logoKopdes from '@/assets/logo-kopdes.png';
+import { useKoperasiSettings } from '@/hooks/useKoperasiSettings';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
@@ -36,6 +37,12 @@ interface MobileSidebarProps {
 
 export function MobileSidebar({ open, onOpenChange }: MobileSidebarProps) {
   const location = useLocation();
+  const { settings } = useKoperasiSettings();
+
+  const kopiName = settings?.name || 'Koperasi Desa Merah Putih';
+  const nameParts = kopiName.split(' ');
+  const line1 = nameParts.slice(0, Math.ceil(nameParts.length / 2)).join(' ');
+  const line2 = nameParts.slice(Math.ceil(nameParts.length / 2)).join(' ');
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -48,18 +55,20 @@ export function MobileSidebar({ open, onOpenChange }: MobileSidebarProps) {
         <div className="flex h-24 items-center gap-3 border-b border-border px-4">
           <img 
             src={logoKopdes} 
-            alt="Logo Kopdes Merah Putih" 
+            alt={`Logo ${kopiName}`}
             className="h-16 w-16 object-contain flex-shrink-0"
           />
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-primary leading-tight">Koperasi Desa</span>
-            <span className="text-sm font-bold text-primary leading-tight">Merah Putih</span>
-            <span className="text-xs text-muted-foreground leading-tight">Desa Mesuji Jaya</span>
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm font-bold text-primary leading-tight truncate">{line1}</span>
+            {line2 && <span className="text-sm font-bold text-primary leading-tight truncate">{line2}</span>}
+            <span className="text-xs text-muted-foreground leading-tight truncate">
+              {settings?.address || 'Koperasi Desa'}
+            </span>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-4">
+        <nav className="flex-1 space-y-1 p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 160px)' }}>
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
@@ -82,7 +91,7 @@ export function MobileSidebar({ open, onOpenChange }: MobileSidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 border-t border-border p-4">
+        <div className="absolute bottom-0 left-0 right-0 border-t border-border p-4 bg-card">
           <NavLink
             to="/pengaturan"
             onClick={() => onOpenChange(false)}

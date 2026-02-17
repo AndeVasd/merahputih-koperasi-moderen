@@ -30,27 +30,27 @@ export function CategoryCard({ category, amount, count }: CategoryCardProps) {
     <div
       onClick={() => navigate(categoryPaths[category])}
       className={cn(
-        'group cursor-pointer rounded-xl border border-border bg-card p-6',
+        'group cursor-pointer rounded-xl border border-border bg-card p-4 lg:p-6',
         'transition-all duration-300 hover:border-primary hover:shadow-lg hover:-translate-y-1',
         'animate-fade-in'
       )}
     >
-      <div className="flex items-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-3xl transition-all group-hover:bg-primary group-hover:scale-110">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 lg:h-14 lg:w-14 items-center justify-center rounded-xl bg-primary/10 text-2xl lg:text-3xl transition-all group-hover:bg-primary group-hover:scale-110 flex-shrink-0">
           <span className="group-hover:scale-110 transition-transform">
             {CATEGORY_ICONS[category]}
           </span>
         </div>
-        <div className="flex-1">
-          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-sm lg:text-base text-foreground group-hover:text-primary transition-colors truncate">
             {CATEGORY_LABELS[category]}
           </h3>
-          <p className="text-sm text-muted-foreground">{count} pinjaman aktif</p>
+          <p className="text-xs text-muted-foreground">{count} pinjaman aktif</p>
         </div>
       </div>
-      <div className="mt-4 pt-4 border-t border-border">
-        <p className="text-sm text-muted-foreground">Total Pinjaman</p>
-        <p className="text-xl font-bold text-foreground">{formatCurrency(amount)}</p>
+      <div className="mt-3 pt-3 border-t border-border">
+        <p className="text-xs text-muted-foreground">Total Pinjaman</p>
+        <p className="text-sm lg:text-xl font-bold text-foreground truncate">{formatCurrency(amount)}</p>
       </div>
     </div>
   );
