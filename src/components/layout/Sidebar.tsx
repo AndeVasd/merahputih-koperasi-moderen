@@ -34,25 +34,20 @@ export function Sidebar() {
   const { settings } = useKoperasiSettings();
 
   const kopiName = settings?.name || 'Koperasi Desa Merah Putih';
-  // Split name for display
-  const nameParts = kopiName.split(' ');
-  const line1 = nameParts.slice(0, Math.ceil(nameParts.length / 2)).join(' ');
-  const line2 = nameParts.slice(Math.ceil(nameParts.length / 2)).join(' ');
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-card no-print hidden lg:block">
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="flex h-24 items-center gap-3 border-b border-border px-4">
+        <div className="flex h-auto min-h-[5rem] items-center gap-3 border-b border-border px-4 py-3">
           <img 
             src={logoKopdes} 
             alt={`Logo ${kopiName}`}
             className="h-16 w-16 object-contain flex-shrink-0"
           />
           <div className="flex flex-col min-w-0">
-            <span className="text-sm font-bold text-primary leading-tight truncate">{line1}</span>
-            {line2 && <span className="text-sm font-bold text-primary leading-tight truncate">{line2}</span>}
-            <span className="text-xs text-muted-foreground leading-tight truncate">
+            <span className="text-xs font-bold text-primary leading-snug line-clamp-2">{kopiName}</span>
+            <span className="text-[10px] text-muted-foreground leading-tight line-clamp-2 mt-0.5">
               {settings?.address || 'Koperasi Desa'}
             </span>
           </div>
