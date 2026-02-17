@@ -13,6 +13,7 @@ import LoanHistory from "./pages/LoanHistory";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import Install from "./pages/Install";
 
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -68,6 +69,7 @@ const App = () => (
                 <Settings />
               </ProtectedRoute>
             } />
+            <Route path="/install" element={<Install />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
