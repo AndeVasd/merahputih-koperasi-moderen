@@ -52,7 +52,7 @@ export default function Dashboard() {
     return (
       <MainLayout
         title="Dashboard"
-        subtitle={`Selamat datang di Sistem ${settings?.name || 'Koperasi'}`}
+        subtitle={`Selamat datang di ${settings?.name || 'Koperasi'}`}
       >
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-5 mb-8">
           {[...Array(5)].map((_, i) => (
@@ -70,7 +70,7 @@ export default function Dashboard() {
   return (
     <MainLayout
       title="Dashboard"
-      subtitle={`Selamat datang di Sistem ${settings?.name || 'Koperasi'}`}
+      subtitle={`Selamat datang di ${settings?.name || 'Koperasi'}`}
     >
       {/* Stats Grid */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-5 mb-8">

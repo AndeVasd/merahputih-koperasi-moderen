@@ -56,7 +56,7 @@ export function StatCard({ title, value, subtitle, icon: Icon, trend, variant = 
 
   return (
     <div className={cn(
-      'relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 animate-fade-in',
+      'relative overflow-hidden rounded-2xl p-4 lg:p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 animate-fade-in',
       styles.card
     )}>
       {/* Decorative circle */}
@@ -64,7 +64,7 @@ export function StatCard({ title, value, subtitle, icon: Icon, trend, variant = 
         <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10" />
       )}
       
-      <div className="relative flex items-start justify-between">
+      <div className="relative flex items-start justify-between gap-2">
         <div className="space-y-2">
           <p className={cn('text-xs font-semibold uppercase tracking-wider', styles.title)}>
             {title}
