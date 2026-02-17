@@ -1,7 +1,7 @@
 import { Loan, CATEGORY_LABELS, CATEGORY_ICONS } from '@/types/koperasi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Printer } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface RecentLoansProps {
@@ -38,36 +38,38 @@ export function RecentLoans({ loans, onViewReceipt }: RecentLoansProps) {
     });
   };
 
+  if (loans.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-8 text-center animate-fade-in">
+        <p className="text-muted-foreground">Belum ada pinjaman</p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl border border-border bg-card animate-fade-in">
-      <div className="flex items-center justify-between border-b border-border p-6">
-        <h3 className="text-lg font-semibold text-foreground">Pinjaman Terbaru</h3>
-        <Button variant="outline" size="sm">
-          Lihat Semua
-        </Button>
-      </div>
       <div className="divide-y divide-border">
         {loans.map((loan, index) => (
           <div
             key={loan.id}
-            className="flex items-center justify-between p-4 hover:bg-secondary/50 transition-colors"
+            className="flex items-center justify-between p-3 lg:p-4 hover:bg-secondary/50 transition-colors"
             style={{ animationDelay: `${index * 100}ms` }}
           >
-            <div className="flex items-center gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-xl">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-lg bg-primary/10 text-lg lg:text-xl flex-shrink-0">
                 {CATEGORY_ICONS[loan.category]}
               </div>
-              <div>
-                <p className="font-medium text-foreground">{loan.memberName}</p>
-                <p className="text-sm text-muted-foreground">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-sm text-foreground truncate">{loan.memberName}</p>
+                <p className="text-xs text-muted-foreground truncate">
                   {CATEGORY_LABELS[loan.category]} • {formatDate(loan.createdAt)}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0 ml-2">
               <div className="text-right">
-                <p className="font-semibold text-foreground">{formatCurrency(loan.totalAmount)}</p>
-                <Badge variant="outline" className={cn('text-xs', statusStyles[loan.status])}>
+                <p className="font-semibold text-xs lg:text-sm text-foreground">{formatCurrency(loan.totalAmount)}</p>
+                <Badge variant="outline" className={cn('text-xs hidden sm:inline-flex', statusStyles[loan.status])}>
                   {statusLabels[loan.status]}
                 </Badge>
               </div>
@@ -75,7 +77,7 @@ export function RecentLoans({ loans, onViewReceipt }: RecentLoansProps) {
                 variant="ghost"
                 size="icon"
                 onClick={() => onViewReceipt(loan)}
-                className="hover:bg-primary/10 hover:text-primary"
+                className="hover:bg-primary/10 hover:text-primary h-8 w-8"
               >
                 <Eye className="h-4 w-4" />
               </Button>
