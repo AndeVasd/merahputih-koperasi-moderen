@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Search, User, LogOut, Menu, AlertTriangle, Clock, X, CreditCard, Users } from 'lucide-react';
+import { Bell, Search, User, LogOut, Menu, AlertTriangle, Clock, X, CreditCard, Users, Sun, Moon } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,6 +32,7 @@ interface HeaderProps {
 export function Header({ title, subtitle, onMenuClick }: HeaderProps) {
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -172,6 +174,18 @@ export function Header({ title, subtitle, onMenuClick }: HeaderProps) {
             </div>
           )}
         </div>
+
+        {/* Dark Mode Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="relative"
+        >
+          <Sun className="h-5 w-5 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
+          <span className="sr-only">Toggle tema</span>
+        </Button>
 
         {/* Notifications */}
         <Popover>
