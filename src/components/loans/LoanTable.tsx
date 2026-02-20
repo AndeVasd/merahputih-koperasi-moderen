@@ -1,7 +1,7 @@
 import { Loan, CATEGORY_LABELS, CATEGORY_ICONS } from '@/types/koperasi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Printer, MoreHorizontal, CheckCircle, XCircle, Clock, Trash2 } from 'lucide-react';
+import { Eye, Printer, MoreHorizontal, CheckCircle, XCircle, Clock, Trash2, Banknote } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Table,
@@ -36,6 +36,7 @@ interface LoanTableProps {
   onPrint: (loan: Loan) => void;
   onUpdateStatus?: (loanId: string, status: 'active' | 'paid' | 'overdue') => void;
   onDelete?: (loanId: string) => void;
+  onPayment?: (loan: Loan) => void;
 }
 
 const statusStyles = {
@@ -50,7 +51,7 @@ const statusLabels = {
   overdue: 'Jatuh Tempo',
 };
 
-export function LoanTable({ loans, onViewReceipt, onPrint, onUpdateStatus, onDelete }: LoanTableProps) {
+export function LoanTable({ loans, onViewReceipt, onPrint, onUpdateStatus, onDelete, onPayment }: LoanTableProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -132,6 +133,12 @@ export function LoanTable({ loans, onViewReceipt, onPrint, onUpdateStatus, onDel
                       <Printer className="h-4 w-4 mr-2" />
                       Cetak Struk
                     </DropdownMenuItem>
+                    {onPayment && loan.status !== 'paid' && (
+                      <DropdownMenuItem onClick={() => onPayment(loan)}>
+                        <Banknote className="h-4 w-4 mr-2" />
+                        Bayar / Cicil
+                      </DropdownMenuItem>
+                    )}
                     {onUpdateStatus && (
                       <>
                         <DropdownMenuSeparator />
