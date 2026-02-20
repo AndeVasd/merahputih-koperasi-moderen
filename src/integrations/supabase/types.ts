@@ -222,6 +222,62 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          loan_id: string
+          notes: string | null
+          paid_at: string | null
+          payment_method: string
+          payment_status: string
+          updated_at: string
+          xendit_external_id: string | null
+          xendit_invoice_id: string | null
+          xendit_invoice_url: string | null
+          xendit_payment_method: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          loan_id: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string
+          payment_status?: string
+          updated_at?: string
+          xendit_external_id?: string | null
+          xendit_invoice_id?: string | null
+          xendit_invoice_url?: string | null
+          xendit_payment_method?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          loan_id?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_method?: string
+          payment_status?: string
+          updated_at?: string
+          xendit_external_id?: string | null
+          xendit_invoice_id?: string | null
+          xendit_invoice_url?: string | null
+          xendit_payment_method?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
