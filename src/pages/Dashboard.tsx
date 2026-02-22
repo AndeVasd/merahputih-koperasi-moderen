@@ -4,6 +4,7 @@ import { StatCard } from '@/components/dashboard/StatCard';
 import { CategoryCard } from '@/components/dashboard/CategoryCard';
 import { RecentLoans } from '@/components/dashboard/RecentLoans';
 import { LoanChart } from '@/components/dashboard/LoanChart';
+import { HeroBanner } from '@/components/dashboard/HeroBanner';
 import { ReceiptModal } from '@/components/receipt/ReceiptModal';
 import { Users, Wallet, AlertTriangle, TrendingUp, CheckCircle } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
@@ -72,6 +73,9 @@ export default function Dashboard() {
       title="Dashboard"
       subtitle={`Selamat datang di ${settings?.name || 'Koperasi'}`}
     >
+      {/* Hero Banner */}
+      <HeroBanner />
+
       {/* Stats Grid */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-5 mb-8">
         <StatCard

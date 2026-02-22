@@ -140,6 +140,16 @@
   }
 }
 
+@keyframes slow-zoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
+}
+
+@keyframes progress-bar {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
 @media print {
   .no-print {
     display: none !important;
