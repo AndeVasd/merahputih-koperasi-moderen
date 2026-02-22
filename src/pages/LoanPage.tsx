@@ -5,7 +5,7 @@ import { LoanTable } from '@/components/loans/LoanTable';
 import { LoanForm } from '@/components/loans/LoanForm';
 import { ReceiptModal } from '@/components/receipt/ReceiptModal';
 import { LoanReceipt } from '@/components/receipt/LoanReceipt';
-import { PaymentDialog } from '@/components/payments/PaymentDialog';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Download, Loader2 } from 'lucide-react';
@@ -35,7 +35,7 @@ export default function LoanPage() {
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [selectedBorrowerPhone, setSelectedBorrowerPhone] = useState<string | undefined>();
   const [loanToPrint, setLoanToPrint] = useState<Loan | null>(null);
-  const [paymentLoan, setPaymentLoan] = useState<Loan | null>(null);
+  
   
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -230,7 +230,6 @@ export default function LoanPage() {
           onPrint={handlePrintLoan}
           onUpdateStatus={updateLoanStatus}
           onDelete={deleteLoan}
-          onPayment={(loan) => setPaymentLoan(loan)}
         />
       )}
 
@@ -261,12 +260,6 @@ export default function LoanPage() {
         </div>
       )}
 
-      {/* Payment Dialog */}
-      <PaymentDialog
-        loan={paymentLoan}
-        open={!!paymentLoan}
-        onClose={() => setPaymentLoan(null)}
-      />
     </MainLayout>
   );
 }
