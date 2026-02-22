@@ -1,7 +1,1 @@
 project_id = "obieqglffhsnvyiaggef"
-
-[functions.create-xendit-invoice]
-verify_jwt = false
-
-[functions.xendit-webhook]
-verify_jwt = false
