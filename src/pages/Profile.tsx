@@ -2,27 +2,23 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MapPin, Phone, Mail, Calendar, Target, Eye, Users, Building2 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { MapPin, Phone, Mail, User, Users, Building2, FileText, Hash } from 'lucide-react';
 import logoKopdes from '@/assets/logo-kopdes.png';
 import { useKoperasiSettings } from '@/hooks/useKoperasiSettings';
+import { useOrganizationMembers } from '@/hooks/useOrganizationMembers';
 
 const Profile = () => {
   const { settings, isLoading } = useKoperasiSettings();
+  const { pengurus, pengawas, loading: membersLoading } = useOrganizationMembers();
 
   if (isLoading) {
     return (
       <MainLayout title="Profil Koperasi" subtitle="Memuat informasi...">
         <div className="space-y-6">
-          <Card className="overflow-hidden">
-            <div className="p-8">
-              <Skeleton className="h-32 w-32 rounded-2xl" />
-              <Skeleton className="h-8 w-64 mt-4" />
-              <Skeleton className="h-4 w-48 mt-2" />
-            </div>
-          </Card>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Skeleton className="h-64" />
-            <Skeleton className="h-64" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Skeleton className="h-96" />
+            <Skeleton className="h-96 lg:col-span-2" />
           </div>
         </div>
       </MainLayout>
@@ -35,164 +31,216 @@ const Profile = () => {
       subtitle={`Informasi lengkap tentang ${settings?.name || 'Koperasi'}`}
     >
       <div className="space-y-6">
-        {/* Header Section */}
-        <Card className="overflow-hidden">
-          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-8">
-          <div className="flex flex-col md:flex-row items-center gap-8">
-              <div className="bg-white rounded-2xl p-5 shadow-lg flex-shrink-0">
+        {/* Top Section: Sidebar + Info */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Sidebar - Koperasi Identity */}
+          <Card className="overflow-hidden">
+            <CardContent className="p-6 flex flex-col items-center text-center">
+              {/* Logo */}
+              <div className="bg-white rounded-2xl p-4 shadow-lg mb-4">
                 <img 
                   src={logoKopdes} 
                   alt={`Logo ${settings?.name || 'Koperasi'}`} 
-                  className="h-40 w-40 object-contain"
+                  className="h-28 w-28 object-contain"
                 />
               </div>
-              <div className="text-center md:text-left">
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">
-                  {settings?.name || 'KOPDES MERAH PUTIH'}
-                </h1>
-                <p className="text-sm text-muted-foreground mb-4 max-w-md leading-relaxed">
-                  {settings?.address || 'Koperasi Desa'}
-                </p>
-                <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                  <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                    Koperasi Simpan Pinjam
-                  </span>
-                  <span className="px-3 py-1 bg-green-500/10 text-green-600 rounded-full text-sm font-medium">
-                    Aktif
-                  </span>
+
+              {/* Badges */}
+              <span className="px-4 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-semibold mb-3">
+                Koperasi Simpan Pinjam
+              </span>
+
+              {/* Name */}
+              <h2 className="text-lg font-bold text-foreground mb-3">
+                {settings?.name || 'Koperasi Desa Merah Putih'}
+              </h2>
+
+              {/* Details */}
+              <div className="w-full space-y-2 text-left text-sm">
+                <div className="flex items-start gap-2">
+                  <Hash className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-muted-foreground text-xs">NIK</p>
+                    <p className="font-medium text-foreground">1.602.080.120.002</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-muted-foreground text-xs">NIB</p>
+                    <p className="font-medium text-foreground">-</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-muted-foreground text-xs">AHU</p>
+                    <p className="font-medium text-foreground text-xs">AHU-0069291.AH.01.29.TAHUN 2025</p>
+                  </div>
                 </div>
               </div>
-            </div>
+
+              <Separator className="my-4" />
+
+              {/* Contact Info */}
+              <div className="w-full space-y-3 text-left text-sm">
+                <div className="flex items-start gap-2">
+                  <Phone className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-muted-foreground text-xs">Telepon</p>
+                    <p className="font-medium text-foreground">{settings?.phone || '-'}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Mail className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-muted-foreground text-xs">Email</p>
+                    <p className="font-medium text-foreground">{settings?.email || '-'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <Separator className="my-4" />
+
+              {/* Status */}
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-sm font-medium text-green-600">Berbadan Hukum</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Right Side - Kedudukan */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Kedudukan */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-primary" />
+                  Kedudukan
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="p-3 rounded-lg border bg-muted/30">
+                    <p className="text-xs text-muted-foreground mb-1">Provinsi</p>
+                    <p className="font-bold text-sm text-foreground">SUMATERA SELATAN</p>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-muted/30">
+                    <p className="text-xs text-muted-foreground mb-1">Kabupaten/Kota</p>
+                    <p className="font-bold text-sm text-foreground">KAB. OGAN KOMERING ILIR</p>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-muted/30">
+                    <p className="text-xs text-muted-foreground mb-1">Kecamatan</p>
+                    <p className="font-bold text-sm text-foreground">MESUJI MAKMUR</p>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-muted/30">
+                    <p className="text-xs text-muted-foreground mb-1">Kelurahan/Desa</p>
+                    <p className="font-bold text-sm text-foreground">MESUJI JAYA</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Alamat Lengkap */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  Alamat Lengkap
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="p-4 rounded-lg bg-muted/30 border">
+                  <p className="text-foreground">
+                    {settings?.address || 'Dusun I Desa Mesuji Jaya Kecamatan Mesuji Makmur Kabupaten Ogan Komering Ilir'}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+        </div>
+
+        {/* Pengurus Section */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              Pengurus
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {membersLoading ? (
+              <div className="flex gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-48" />
+                ))}
+              </div>
+            ) : pengurus.length === 0 ? (
+              <p className="text-muted-foreground text-sm text-center py-6">Belum ada data pengurus</p>
+            ) : (
+              <div className="flex flex-wrap gap-4">
+                {pengurus.map((member) => (
+                  <MemberChip key={member.id} name={member.name} position={member.position} photoUrl={member.photo_url} />
+                ))}
+              </div>
+            )}
+          </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Informasi Kontak */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-primary" />
-                Informasi Kontak
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="font-medium text-foreground">Alamat</p>
-                  <p className="text-muted-foreground">
-                    {settings?.address || 'Alamat belum diatur'}
-                  </p>
-                </div>
+        {/* Pengawas Section */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              Pengawas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {membersLoading ? (
+              <div className="flex gap-4">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-48" />
+                ))}
               </div>
-              <Separator />
-              <div className="flex items-start gap-3">
-                <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="font-medium text-foreground">Telepon</p>
-                  <p className="text-muted-foreground">
-                    {settings?.phone || 'Telepon belum diatur'}
-                  </p>
-                </div>
+            ) : pengawas.length === 0 ? (
+              <p className="text-muted-foreground text-sm text-center py-6">Belum ada data pengawas</p>
+            ) : (
+              <div className="flex flex-wrap gap-4">
+                {pengawas.map((member) => (
+                  <MemberChip key={member.id} name={member.name} position={member.position} photoUrl={member.photo_url} />
+                ))}
               </div>
-              <Separator />
-              <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="font-medium text-foreground">Email</p>
-                  <p className="text-muted-foreground">
-                    {settings?.email || 'Email belum diatur'}
-                  </p>
-                </div>
-              </div>
-              <Separator />
-              <div className="flex items-start gap-3">
-                <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="font-medium text-foreground">Tanggal Berdiri</p>
-                  <p className="text-muted-foreground">17 Agustus 2020</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Visi & Misi */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-primary" />
-                Visi & Misi
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Eye className="h-4 w-4 text-primary" />
-                  <h3 className="font-semibold text-foreground">Visi</h3>
-                </div>
-                <p className="text-muted-foreground pl-6">
-                  Menjadi koperasi desa yang mandiri, transparan, dan berkontribusi nyata 
-                  dalam meningkatkan kesejahteraan masyarakat.
-                </p>
-              </div>
-              <Separator />
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Target className="h-4 w-4 text-primary" />
-                  <h3 className="font-semibold text-foreground">Misi</h3>
-                </div>
-                <ul className="text-muted-foreground pl-6 space-y-2 list-disc list-inside">
-                  <li>Memberikan pelayanan simpan pinjam yang mudah dan terjangkau</li>
-                  <li>Menyediakan kebutuhan sembako dengan harga bersaing</li>
-                  <li>Mendukung petani dengan penyediaan alat pertanian dan obat-obatan</li>
-                  <li>Mengelola keuangan secara transparan dan akuntabel</li>
-                  <li>Memberdayakan ekonomi masyarakat desa</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Layanan */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
-                Layanan Koperasi
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                  <h3 className="font-semibold text-blue-600 mb-2">💰 Pinjaman Uang</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Pinjaman modal usaha dan kebutuhan mendesak dengan bunga ringan
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                  <h3 className="font-semibold text-orange-600 mb-2">🛒 Sembako</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Penyediaan kebutuhan pokok dengan sistem pembayaran cicilan
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <h3 className="font-semibold text-green-600 mb-2">🚜 Alat Pertanian</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Penyewaan dan penjualan alat pertanian untuk mendukung petani
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                  <h3 className="font-semibold text-purple-600 mb-2">💊 Obat-obatan</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Penyediaan obat pertanian dan pupuk dengan harga terjangkau
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </MainLayout>
   );
 };
+
+function MemberChip({ name, position, photoUrl }: { name: string; position: string; photoUrl: string | null }) {
+  const initials = name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
+  return (
+    <div className="flex items-center gap-3 p-3 rounded-xl border bg-card shadow-sm hover:shadow-md transition-shadow">
+      <Avatar className="h-10 w-10 ring-2 ring-primary/20">
+        <AvatarImage src={photoUrl || undefined} alt={name} className="object-cover" />
+        <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+          {initials || <User className="w-4 h-4" />}
+        </AvatarFallback>
+      </Avatar>
+      <div>
+        <p className="font-semibold text-sm text-foreground leading-tight">{name}</p>
+        <p className="text-xs text-muted-foreground uppercase tracking-wide">{position}</p>
+      </div>
+    </div>
+  );
+}
 
 export default Profile;
